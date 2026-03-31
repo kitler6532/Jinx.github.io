@@ -17,11 +17,8 @@
       --muted:     #6b6b8a;
       --glow:      0 0 30px rgba(124,58,237,0.35);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -30,16 +27,12 @@
       line-height: 1.7;
       overflow-x: hidden;
     }
-
-    /* ── NOISE OVERLAY ── */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       pointer-events: none; opacity: .6;
     }
-
-    /* ── GRID LINES ── */
     body::after {
       content: '';
       position: fixed; inset: 0; z-index: 0;
@@ -49,10 +42,8 @@
       background-size: 60px 60px;
       pointer-events: none;
     }
-
     section, nav, footer { position: relative; z-index: 1; }
 
-    /* ── NAV ── */
     nav {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.4rem 6vw;
@@ -61,7 +52,6 @@
       background: rgba(8,8,16,.7);
       position: sticky; top: 0; z-index: 100;
     }
-
     .nav-logo {
       font-family: 'Syne', sans-serif;
       font-weight: 800; font-size: 1.4rem;
@@ -69,7 +59,6 @@
       background: linear-gradient(135deg, var(--purple-lt), var(--pink));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a {
       color: var(--muted); text-decoration: none;
@@ -78,13 +67,11 @@
     }
     .nav-links a:hover { color: var(--purple-lt); }
 
-    /* ── HERO ── */
     #hero {
       min-height: 92vh;
       display: flex; flex-direction: column; justify-content: center;
       padding: 8vh 6vw 6vh;
     }
-
     .hero-tag {
       font-size: .75rem; letter-spacing: .18em; text-transform: uppercase;
       color: var(--purple-lt);
@@ -96,7 +83,6 @@
       content: ''; display: block;
       width: 28px; height: 1px; background: var(--purple-lt);
     }
-
     h1 {
       font-family: 'Syne', sans-serif;
       font-size: clamp(3.5rem, 9vw, 7.5rem);
@@ -104,30 +90,26 @@
       margin-bottom: 1.2rem;
       opacity: 0; animation: fadeUp .7s .35s forwards;
     }
-
     h1 .name-highlight {
       display: block;
       background: linear-gradient(135deg, var(--purple-lt) 0%, var(--pink) 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-
     .hero-sub {
       max-width: 520px;
       color: var(--muted); font-size: .95rem; margin-bottom: 2.4rem;
       opacity: 0; animation: fadeUp .7s .5s forwards;
     }
-
     .btn-row {
       display: flex; gap: 1rem; flex-wrap: wrap;
       opacity: 0; animation: fadeUp .7s .65s forwards;
     }
-
     .btn {
       display: inline-flex; align-items: center; gap: .5rem;
       padding: .75rem 1.8rem; border-radius: 4px;
       font-family: 'DM Mono', monospace; font-size: .8rem;
       letter-spacing: .08em; text-transform: uppercase;
-      text-decoration: none; transition: all .25s; cursor: pointer;
+      text-decoration: none; transition: all .25s; cursor: pointer; border: none;
     }
     .btn-primary {
       background: var(--purple); color: #fff;
@@ -156,12 +138,7 @@
     }
     .stat-label { font-size: .75rem; color: var(--muted); letter-spacing: .06em; }
 
-    /* ── SECTIONS ── */
-    .section {
-      padding: 7rem 6vw;
-      border-top: 1px solid var(--border);
-    }
-
+    .section { padding: 7rem 6vw; border-top: 1px solid var(--border); }
     .section-label {
       font-size: .72rem; letter-spacing: .2em; text-transform: uppercase;
       color: var(--purple-lt); margin-bottom: .6rem;
@@ -170,31 +147,24 @@
     .section-label::before {
       content: ''; display: block; width: 22px; height: 1px; background: var(--purple-lt);
     }
-
     .section-title {
       font-family: 'Syne', sans-serif; font-weight: 800;
       font-size: clamp(1.8rem, 4vw, 3rem);
       letter-spacing: -.02em; margin-bottom: 3rem;
     }
 
-    /* ── ABOUT ── */
     .about-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
-      align-items: start;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
     }
     .about-body { color: var(--muted); line-height: 1.9; }
     .about-body p + p { margin-top: 1rem; }
-
-    .skills-list {
-      display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.6rem;
-    }
+    .skills-list { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.6rem; }
     .skill-tag {
       background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
       color: var(--purple-lt); font-size: .72rem;
       letter-spacing: .08em; text-transform: uppercase;
       padding: .3rem .9rem; border-radius: 2px;
     }
-
     .about-aside {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 8px; padding: 2rem;
@@ -204,14 +174,15 @@
       text-transform: uppercase; letter-spacing: .1em;
       color: var(--muted); margin-bottom: 1.2rem;
     }
-    .info-row { display: flex; justify-content: space-between; padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .82rem; }
+    .info-row {
+      display: flex; justify-content: space-between;
+      padding: .6rem 0; border-bottom: 1px solid var(--border); font-size: .82rem;
+    }
     .info-row:last-child { border-bottom: none; }
     .info-key { color: var(--muted); }
     .info-val { color: var(--purple-lt); }
 
-    /* ── CARDS ── */
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.4rem; }
-
     .card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 8px; padding: 1.8rem;
@@ -227,42 +198,56 @@
     .card:hover::before { opacity: 1; }
 
     .card-icon {
-      width: 42px; height: 42px; border-radius: 8px; margin-bottom: 1.2rem;
-      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+      width: 48px; height: 48px; border-radius: 10px; margin-bottom: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; overflow: hidden;
     }
+    .card-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
     .discord-icon { background: rgba(88,101,242,.2); border: 1px solid rgba(88,101,242,.4); }
     .roblox-icon  { background: rgba(239,68,68,.2);  border: 1px solid rgba(239,68,68,.4); }
 
     .card-name {
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem;
-      margin-bottom: .3rem;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: .3rem;
     }
     .card-meta { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
     .card-desc { font-size: .82rem; color: var(--muted); line-height: 1.8; }
 
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1.2rem; flex-wrap: wrap; gap: .6rem;
+    }
     .card-badge {
-      display: inline-block; margin-top: 1rem;
+      display: inline-block;
       font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
       padding: .25rem .7rem; border-radius: 2px;
     }
     .badge-mod   { background: rgba(124,58,237,.2); color: var(--purple-lt); border: 1px solid rgba(124,58,237,.4); }
     .badge-admin { background: rgba(236,72,153,.2); color: var(--pink);      border: 1px solid rgba(236,72,153,.4); }
     .badge-head  { background: rgba(245,158,11,.15); color: #f59e0b;         border: 1px solid rgba(245,158,11,.35); }
+    .badge-mgr   { background: rgba(16,185,129,.15); color: #10b981;         border: 1px solid rgba(16,185,129,.35); }
 
-    /* ── CONTACT ── */
+    .card-link {
+      font-size: .72rem; color: var(--muted); text-decoration: none;
+      letter-spacing: .05em;
+      transition: color .2s;
+    }
+    .card-link:hover { color: var(--purple-lt); }
+
+    .card-updated {
+      font-size: .68rem; color: var(--muted); margin-top: .6rem; opacity: .7;
+    }
+
     .contact-wrap {
       display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
     }
     .contact-blurb { color: var(--muted); line-height: 1.9; }
-
     .socials { display: flex; flex-direction: column; gap: .9rem; margin-top: 2rem; }
     .social-link {
       display: flex; align-items: center; gap: 1rem;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 6px; padding: 1rem 1.4rem;
       text-decoration: none; color: var(--text);
-      transition: border-color .2s, box-shadow .2s;
-      font-size: .85rem;
+      transition: border-color .2s, box-shadow .2s; font-size: .85rem;
     }
     .social-link:hover { border-color: var(--purple-lt); box-shadow: var(--glow); }
     .social-icon { font-size: 1.2rem; }
@@ -271,7 +256,9 @@
 
     .contact-form { display: flex; flex-direction: column; gap: 1rem; }
     .form-field { display: flex; flex-direction: column; gap: .4rem; }
-    .form-field label { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .form-field label {
+      font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    }
     .form-field input, .form-field textarea {
       background: var(--surface); border: 1px solid var(--border);
       color: var(--text); border-radius: 4px;
@@ -282,7 +269,6 @@
       border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,.15);
     }
 
-    /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--border);
       padding: 2.5rem 6vw;
@@ -296,19 +282,13 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(22px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
-    .reveal {
-      opacity: 0; transform: translateY(20px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 700px) {
       .about-grid, .contact-wrap { grid-template-columns: 1fr; gap: 2.5rem; }
       .hero-stats { gap: 1.8rem; }
@@ -319,7 +299,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <span class="nav-logo">Jinx</span>
   <ul class="nav-links">
@@ -327,10 +306,10 @@
     <li><a href="#discord">Discord</a></li>
     <li><a href="#roblox">Roblox</a></li>
     <li><a href="#contact">Contact</a></li>
+    <li><a href="#dmca">DMCA</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
 <section id="hero">
   <p class="hero-tag">Moderation Portfolio</p>
   <h1>
@@ -338,7 +317,7 @@
     <span class="name-highlight">Jinx.</span>
   </h1>
   <p class="hero-sub">
-    Community moderator for Discord servers and Roblox games. I help keep spaces safe, fair, and fun for everyone.
+    Community moderator for Discord servers and Roblox games. Also a Roblox Studio developer and Discord bot builder. I help keep spaces safe, fair and fun for everyone.
   </p>
   <div class="btn-row">
     <a href="#discord" class="btn btn-primary">View My Work</a>
@@ -346,12 +325,12 @@
   </div>
   <div class="hero-stats">
     <div>
-      <div class="stat-num">3+</div>
+      <div class="stat-num">2</div>
       <div class="stat-label">Discord Servers</div>
     </div>
     <div>
-      <div class="stat-num">2+</div>
-      <div class="stat-label">Roblox Games</div>
+      <div class="stat-num">6,580</div>
+      <div class="stat-label">Members Managed</div>
     </div>
     <div>
       <div class="stat-num">100%</div>
@@ -360,76 +339,77 @@
   </div>
 </section>
 
-<!-- ABOUT -->
 <section id="about" class="section">
   <p class="section-label reveal">About</p>
   <h2 class="section-title reveal">Who am I?</h2>
   <div class="about-grid">
     <div class="about-body reveal">
       <p>
-        I'm <strong>Jinx</strong> — a passionate community moderator with experience managing Discord servers and Roblox game communities. I take pride in creating welcoming, well-run spaces where everyone can enjoy themselves.
+        I'm <strong>Jinx</strong>, also known as <strong>Matei_Royale</strong> on both Discord and Roblox. I'm a dedicated community moderator with experience managing Discord servers and Roblox game communities. I take pride in creating welcoming, well-run spaces where everyone can enjoy themselves.
       </p>
       <p>
-        Whether it's enforcing rules fairly, resolving conflicts, or supporting server members, I bring dedication and a calm head to everything I do.
-      </p>
-      <p style="color: var(--muted); font-size:.8rem; margin-top:1.4rem;">
-        — Edit this section with your real info! —
+        Whether it's enforcing rules fairly, resolving conflicts, or supporting server members, I bring dedication and a calm head to everything I do. I also build custom Discord bots via YAGPDB, develop in Roblox Studio since December 2020, and can set up an entire Discord server from scratch.
       </p>
       <div class="skills-list">
         <span class="skill-tag">Rule Enforcement</span>
         <span class="skill-tag">Conflict Resolution</span>
         <span class="skill-tag">Community Management</span>
-        <span class="skill-tag">Anti-Cheat</span>
+        <span class="skill-tag">Anti-Cheat Systems</span>
         <span class="skill-tag">Ban Appeals</span>
-        <span class="skill-tag">Discord Bots</span>
-        <span class="skill-tag">Roblox Studio</span>
+        <span class="skill-tag">YAGPDB Bot Builder</span>
+        <span class="skill-tag">Roblox Studio Dev</span>
+        <span class="skill-tag">DMCA Knowledge</span>
+        <span class="skill-tag">Roblox Admin Commands</span>
+        <span class="skill-tag">Discord Server Setup</span>
+        <span class="skill-tag">Website Building</span>
+        <span class="skill-tag">Great Communicator</span>
       </div>
     </div>
     <div class="about-aside reveal">
       <p class="aside-title">Quick Info</p>
-      <div class="info-row"><span class="info-key">Username</span><span class="info-val">Jinx</span></div>
-      <div class="info-row"><span class="info-key">Role</span><span class="info-val">Moderator</span></div>
-      <div class="info-row"><span class="info-key">Platforms</span><span class="info-val">Discord · Roblox</span></div>
+      <div class="info-row"><span class="info-key">Username</span><span class="info-val">Jinx / Matei_Royale</span></div>
+      <div class="info-row"><span class="info-key">Role</span><span class="info-val">Moderator, Manager and Dev</span></div>
+      <div class="info-row"><span class="info-key">Platforms</span><span class="info-val">Discord and Roblox</span></div>
       <div class="info-row"><span class="info-key">Languages</span><span class="info-val">English</span></div>
       <div class="info-row"><span class="info-key">Availability</span><span class="info-val">Open to offers</span></div>
     </div>
   </div>
 </section>
 
-<!-- DISCORD -->
 <section id="discord" class="section">
   <p class="section-label reveal">Discord</p>
   <h2 class="section-title reveal">Servers I Moderate</h2>
   <div class="cards">
 
     <div class="card reveal">
-      <div class="card-icon discord-icon">💬</div>
-      <div class="card-name">Server Name Here</div>
-      <div class="card-meta">Add member count · Add server topic</div>
-      <div class="card-desc">Describe what the server is about and what you do there as a moderator. Replace this with real info!</div>
-      <span class="card-badge badge-mod">Moderator</span>
+      <div class="card-icon" style="background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3);">
+        <img id="quickspeed-icon" alt="QuickSpeed icon" />
+      </div>
+      <div class="card-name">QuickSpeed</div>
+      <div class="card-meta">1,613 members</div>
+      <div class="card-desc">A growing Discord community. As Manager I oversee moderation operations, manage the team, handle escalations, and ensure the server runs smoothly for all members.</div>
+      <div class="card-footer">
+        <span class="card-badge badge-mgr">Manager</span>
+        <a href="https://discord.gg/vthSqS5PZz" target="_blank" class="card-link">Join Server</a>
+      </div>
+      <div class="card-updated">Updated 31/03/2026</div>
     </div>
 
     <div class="card reveal">
-      <div class="card-icon discord-icon">🎮</div>
-      <div class="card-name">Server Name Here</div>
-      <div class="card-meta">Add member count · Add server topic</div>
-      <div class="card-desc">Describe what you moderate here, what your responsibilities are, and how long you've been on the team.</div>
-      <span class="card-badge badge-admin">Admin</span>
-    </div>
-
-    <div class="card reveal">
-      <div class="card-icon discord-icon">⚡</div>
-      <div class="card-name">Server Name Here</div>
-      <div class="card-meta">Add member count · Add server topic</div>
-      <div class="card-desc">Add a third server here if you have one, or remove this card if not needed.</div>
-      <span class="card-badge badge-head">Head Mod</span>
+      <div class="card-icon discord-icon">🔧</div>
+      <div class="card-name">Project Uncopylocked Production</div>
+      <div class="card-meta">4,967 members</div>
+      <div class="card-desc">A Roblox development community focused on uncopylocked projects. As Moderator I enforce community guidelines, handle reports, and keep the space productive and respectful.</div>
+      <div class="card-footer">
+        <span class="card-badge badge-mod">Moderator</span>
+        <span class="card-link" style="cursor:default;">Invite Unavailable</span>
+      </div>
+      <div class="card-updated">Updated 31/03/2026</div>
     </div>
 
   </div>
 </section>
 
-<!-- ROBLOX -->
 <section id="roblox" class="section">
   <p class="section-label reveal">Roblox</p>
   <h2 class="section-title reveal">Games I Moderate</h2>
@@ -437,24 +417,27 @@
 
     <div class="card reveal">
       <div class="card-icon roblox-icon">🟥</div>
-      <div class="card-name">Game Name Here</div>
-      <div class="card-meta">Add player count · Add genre</div>
-      <div class="card-desc">Describe the Roblox game and your role. What rules do you enforce? What tools do you use? Replace with real details!</div>
-      <span class="card-badge badge-mod">Moderator</span>
+      <div class="card-name">N/A</div>
+      <div class="card-meta">N/A</div>
+      <div class="card-desc">No Roblox games to display at this time.</div>
+      <div class="card-footer">
+        <span class="card-badge badge-mod">N/A</span>
+      </div>
     </div>
 
     <div class="card reveal">
-      <div class="card-icon roblox-icon">🎯</div>
-      <div class="card-name">Game Name Here</div>
-      <div class="card-meta">Add player count · Add genre</div>
-      <div class="card-desc">Add your second Roblox game here. Talk about your moderation responsibilities and experience in this game.</div>
-      <span class="card-badge badge-admin">Admin</span>
+      <div class="card-icon roblox-icon">🟥</div>
+      <div class="card-name">N/A</div>
+      <div class="card-meta">N/A</div>
+      <div class="card-desc">No Roblox games to display at this time.</div>
+      <div class="card-footer">
+        <span class="card-badge badge-mod">N/A</span>
+      </div>
     </div>
 
   </div>
 </section>
 
-<!-- CONTACT -->
 <section id="contact" class="section">
   <p class="section-label reveal">Contact</p>
   <h2 class="section-title reveal">Get In Touch</h2>
@@ -462,58 +445,107 @@
     <div>
       <p class="contact-blurb reveal">
         Want me to moderate your server or game? Or just want to reach out?
-        Feel free to hit me up on any of the platforms below!
+        Hit me up on any of the platforms below!
       </p>
       <div class="socials reveal">
-        <a href="#" class="social-link">
+        <a href="https://discord.com/users/matei_royale" target="_blank" class="social-link">
           <span class="social-icon">💬</span>
           <div>
             <div class="social-name">Discord</div>
-            <div class="social-handle">YourDiscord#0000</div>
+            <div class="social-handle">matei_royale</div>
           </div>
         </a>
         <a href="#" class="social-link">
           <span class="social-icon">🟥</span>
           <div>
             <div class="social-name">Roblox</div>
-            <div class="social-handle">YourRobloxUsername</div>
-          </div>
-        </a>
-        <a href="#" class="social-link">
-          <span class="social-icon">🐦</span>
-          <div>
-            <div class="social-name">Twitter / X</div>
-            <div class="social-handle">@YourHandle</div>
+            <div class="social-handle">Matei_Royale</div>
           </div>
         </a>
       </div>
     </div>
     <div class="contact-form reveal">
-      <div class="form-field">
-        <label>Your Name</label>
-        <input type="text" placeholder="e.g. CoolUser123"/>
-      </div>
-      <div class="form-field">
-        <label>Discord / Roblox Username</label>
-        <input type="text" placeholder="e.g. User#1234"/>
-      </div>
-      <div class="form-field">
-        <label>Message</label>
-        <textarea rows="5" placeholder="What do you need help with?"></textarea>
-      </div>
-      <button class="btn btn-primary" style="align-self:flex-start;" onclick="alert('Note: To make this form actually send messages, you\'ll need a free service like Formspree.io — ask me how!')">Send Message</button>
+      <form id="contact-form" action="https://formspree.io/f/jinxworkpotfoilo@gmail.com" method="POST" onsubmit="handleContact(event)">
+        <div class="form-field">
+          <label>Your Name</label>
+          <input type="text" name="name" id="contact-name" placeholder="e.g. CoolUser123" required/>
+        </div>
+        <div class="form-field">
+          <label>Discord or Roblox Username</label>
+          <input type="text" name="username" placeholder="e.g. User#1234"/>
+        </div>
+        <div class="form-field">
+          <label>Your Email (so I can reply)</label>
+          <input type="email" name="_replyto" placeholder="yourname@email.com" required/>
+        </div>
+        <div class="form-field">
+          <label>Message</label>
+          <textarea rows="5" name="message" placeholder="What do you need help with?" required></textarea>
+        </div>
+        <input type="hidden" name="_subject" value="New message from Jinx Portfolio"/>
+        <button type="submit" class="btn btn-primary" style="align-self:flex-start;" id="contact-btn">Send Message</button>
+        <p id="contact-status" style="font-size:.8rem; color:var(--purple-lt); margin-top:.8rem; display:none;"></p>
+      </form>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<section id="dmca" class="section">
+  <p class="section-label reveal">Legal</p>
+  <h2 class="section-title reveal">DMCA and Copyright Notice</h2>
+  <div class="reveal" style="max-width:780px;">
+    <div style="background:var(--surface); border:1px solid rgba(124,58,237,.4); border-radius:8px; padding:2rem; margin-bottom:2rem;">
+      <p style="font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--purple-lt); margin-bottom:1rem;">&#9888; Copyright Notice</p>
+      <p style="color:var(--muted); line-height:1.9; font-size:.88rem;">
+        All content on this website including but not limited to text, design, graphics, layout, and code is the intellectual property of <strong style="color:var(--text);">Jinx (Matei_Royale)</strong> and is protected under applicable copyright law. Unauthorised reproduction, distribution, or use of any content from this site without express written permission is strictly prohibited and may result in a DMCA takedown notice.
+      </p>
+      <p style="color:var(--muted); line-height:1.9; font-size:.88rem; margin-top:1rem;">
+        If you believe any content on this site infringes upon your copyright, or if you would like to request permission to use any content, please contact me directly using the form below or via Discord at <strong style="color:var(--purple-lt);">matei_royale</strong>. All DMCA requests must include your name, contact details, a description of the copyrighted work, and the specific content in question.
+      </p>
+      <p style="color:var(--muted); font-size:.78rem; margin-top:1.2rem; opacity:.7;">
+        &copy; 2024 Jinx (Matei_Royale). All rights reserved.
+      </p>
+    </div>
+
+    <h3 style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; margin-bottom:1.4rem;">Submit a DMCA or Copyright Request</h3>
+    <div class="contact-form">
+      <form id="dmca-form" action="https://formspree.io/f/jinxworkpotfoilo@gmail.com" method="POST" onsubmit="handleDMCA(event)">
+        <div class="form-field">
+          <label>Your Full Name</label>
+          <input type="text" name="name" id="dmca-name" placeholder="Your legal name" required/>
+        </div>
+        <div class="form-field">
+          <label>Your Email Address</label>
+          <input type="email" name="_replyto" id="dmca-email" placeholder="so I can contact you back" required/>
+        </div>
+        <div class="form-field">
+          <label>Discord or Roblox Username (optional)</label>
+          <input type="text" name="username" id="dmca-user" placeholder="e.g. User#1234 or RobloxName"/>
+        </div>
+        <div class="form-field">
+          <label>Description of your Request</label>
+          <textarea rows="5" name="message" id="dmca-msg" placeholder="Describe the copyrighted work and the specific content you are referencing..." required></textarea>
+        </div>
+        <input type="hidden" name="_subject" value="DMCA Request via Jinx Portfolio"/>
+        <button type="submit" class="btn btn-primary" style="align-self:flex-start;" id="dmca-btn">Submit Request</button>
+        <p id="dmca-status" style="font-size:.8rem; color:var(--purple-lt); margin-top:.8rem; display:none;"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+
 <footer>
   <span class="footer-logo">Jinx</span>
-  <span>Moderation Portfolio · Built with 💜</span>
-  <span>Edit the HTML to add your real info!</span>
+  <span>Moderation Portfolio built with 💜</span>
+  <span>Matei_Royale on Discord and Roblox</span>
 </footer>
 
 <script>
+  // Embed QuickSpeed icon
+  const img = document.getElementById('quickspeed-icon');
+  if(img) { img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; img.style.borderRadius='10px'; }
+
   // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
@@ -525,6 +557,68 @@
     });
   }, { threshold: 0.1 });
   reveals.forEach(el => observer.observe(el));
+
+  async function handleContact(e) {
+    e.preventDefault();
+    const btn = document.getElementById('contact-btn');
+    const status = document.getElementById('contact-status');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/jinxworkpotfoilo@gmail.com', {
+        method: 'POST',
+        body: new FormData(document.getElementById('contact-form')),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        status.textContent = 'Message sent! Jinx will get back to you soon.';
+        status.style.color = 'var(--purple-lt)';
+        status.style.display = 'block';
+        document.getElementById('contact-form').reset();
+      } else {
+        status.textContent = 'Something went wrong. Please try again or contact via Discord.';
+        status.style.color = 'var(--pink)';
+        status.style.display = 'block';
+      }
+    } catch {
+      status.textContent = 'Connection error. Please try again later.';
+      status.style.color = 'var(--pink)';
+      status.style.display = 'block';
+    }
+    btn.textContent = 'Send Message';
+    btn.disabled = false;
+  }
+
+  async function handleDMCA(e) {
+    e.preventDefault();
+    const btn = document.getElementById('dmca-btn');
+    const status = document.getElementById('dmca-status');
+    btn.textContent = 'Submitting...';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/jinxworkpotfoilo@gmail.com', {
+        method: 'POST',
+        body: new FormData(document.getElementById('dmca-form')),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        status.textContent = 'Request submitted! Jinx will contact you at your email address.';
+        status.style.color = 'var(--purple-lt)';
+        status.style.display = 'block';
+        document.getElementById('dmca-form').reset();
+      } else {
+        status.textContent = 'Something went wrong. Please contact via Discord instead.';
+        status.style.color = 'var(--pink)';
+        status.style.display = 'block';
+      }
+    } catch {
+      status.textContent = 'Connection error. Please try again later.';
+      status.style.color = 'var(--pink)';
+      status.style.display = 'block';
+    }
+    btn.textContent = 'Submit Request';
+    btn.disabled = false;
+  }
 </script>
 </body>
 </html>
