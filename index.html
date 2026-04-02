@@ -622,13 +622,14 @@
     /* ── PAGE TRANSITION ── */
     #page-transition {
       position: fixed; inset: 0; z-index: 9999;
-      background: var(--purple);
-      transform: scaleX(0); transform-origin: left;
-      transition: transform .4s cubic-bezier(.77,0,.18,1);
+      background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path .55s cubic-bezier(.77,0,.18,1);
       pointer-events: none;
+      will-change: clip-path;
     }
-    #page-transition.slide-in  { transform: scaleX(1); transform-origin: left; }
-    #page-transition.slide-out { transform: scaleX(0); transform-origin: right; }
+    #page-transition.wipe-in  { clip-path: inset(0 0% 0 0); }
+    #page-transition.wipe-out { clip-path: inset(0 0 0 100%); transition: clip-path .45s cubic-bezier(.77,0,.18,1); }
 
     /* ── HAMBURGER MENU ── */
     .hamburger {
@@ -790,13 +791,21 @@
   <a href="#dmca"     onclick="closeMobileNav()">DMCA</a>
 </div>
 
-<section id="hero">
-  <div class="hero-layout">
+<section id="hero" style="position:relative;">
+  <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.55;"></canvas>
+  <div class="hero-layout" style="position:relative;z-index:1;">
     <div class="hero-text">
       <div class="discord-status-wrap" id="discord-status-wrap">
         <div class="discord-status-dot" id="discord-status-dot"></div>
         <span class="discord-status-text" id="discord-status-text">Fetching status...</span>
         <span style="color:var(--muted);font-size:.7rem;">on Discord</span>
+      </div>
+      <div id="spotify-wrap" style="display:none;align-items:center;gap:.6rem;background:var(--surface);border:1px solid rgba(30,215,96,.3);border-radius:20px;padding:.35rem 1rem;margin-bottom:.6rem;font-size:.72rem;">
+        <span style="color:#1ed760;font-size:.85rem;">♫</span>
+        <span style="color:var(--muted);">Listening to</span>
+        <span id="spotify-track" style="color:var(--text);font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+        <span style="color:var(--muted);">by</span>
+        <span id="spotify-artist" style="color:#1ed760;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
       </div>
       <div class="last-updated">Last updated <span>02 April 2026</span></div>
       <p class="hero-tag">Moderation Portfolio</p>
@@ -819,7 +828,7 @@
       </div>
     </div>
   </div>
-  <div class="hero-stats">
+  <div class="hero-stats" style="position:relative;z-index:1;">
     <div>
       <div class="stat-num" data-count="3">0</div>
       <div class="stat-label">Discord Servers</div>
@@ -1335,15 +1344,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ── PAGE TRANSITION on nav clicks ──
   var pt = document.getElementById('page-transition');
+  var ptBusy = false;
   function doTransition(href) {
-    pt.classList.add('slide-in');
+    if (ptBusy) return;
+    ptBusy = true;
+    // Wipe IN (covers screen)
+    pt.classList.remove('wipe-out');
+    pt.classList.add('wipe-in');
     setTimeout(function() {
+      // Scroll while covered
       var target = document.querySelector(href);
       if (target) target.scrollIntoView({ behavior: 'auto' });
-      pt.classList.remove('slide-in');
-      pt.classList.add('slide-out');
-      setTimeout(function() { pt.classList.remove('slide-out'); }, 400);
-    }, 400);
+      // Wipe OUT (reveals new view)
+      pt.classList.remove('wipe-in');
+      pt.classList.add('wipe-out');
+      setTimeout(function() {
+        pt.classList.remove('wipe-out');
+        ptBusy = false;
+      }, 500);
+    }, 580);
   }
   document.querySelectorAll('a[href^="#"]').forEach(function(a) {
     a.addEventListener('click', function(e) {
@@ -1355,6 +1374,102 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // ── HERO CANVAS: Hex grid + falling particles ──
+  (function initHeroCanvas() {
+    var canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H, particles = [], hexes = [];
+
+    function resize() {
+      var section = canvas.parentElement;
+      W = canvas.width  = section.offsetWidth;
+      H = canvas.height = section.offsetHeight;
+      buildHexGrid();
+    }
+
+    // Hex grid
+    function buildHexGrid() {
+      hexes = [];
+      var size = 32, hx = size * Math.sqrt(3), hy = size * 1.5;
+      for (var row = -1; row < H / hy + 2; row++) {
+        for (var col = -1; col < W / hx + 2; col++) {
+          var x = col * hx + (row % 2) * hx / 2;
+          var y = row * hy;
+          hexes.push({ x: x, y: y, size: size, alpha: Math.random() * 0.06 + 0.02, pulse: Math.random() * Math.PI * 2 });
+        }
+      }
+    }
+
+    function drawHex(x, y, size, alpha) {
+      ctx.beginPath();
+      for (var i = 0; i < 6; i++) {
+        var angle = Math.PI / 180 * (60 * i - 30);
+        var px = x + size * Math.cos(angle);
+        var py = y + size * Math.sin(angle);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(124,58,237,' + alpha + ')';
+      ctx.lineWidth = .8;
+      ctx.stroke();
+    }
+
+    // Particles
+    function Particle() {
+      this.reset();
+    }
+    Particle.prototype.reset = function() {
+      this.x = Math.random() * W;
+      this.y = -10;
+      this.size = Math.random() * 2.5 + .5;
+      this.speed = Math.random() * .6 + .2;
+      this.opacity = Math.random() * .5 + .2;
+      this.drift = (Math.random() - .5) * .3;
+      var colors = ['124,58,237', '168,85,247', '236,72,153', '99,102,241'];
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+    };
+    Particle.prototype.update = function() {
+      this.y += this.speed;
+      this.x += this.drift;
+      this.opacity -= .0008;
+      if (this.y > H + 10 || this.opacity <= 0) this.reset();
+    };
+    Particle.prototype.draw = function() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + this.color + ',' + this.opacity + ')';
+      ctx.fill();
+    };
+
+    for (var i = 0; i < 55; i++) {
+      var p = new Particle();
+      p.y = Math.random() * H; // start spread out
+      particles.push(p);
+    }
+
+    var t = 0;
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.012;
+
+      // Draw hex grid
+      hexes.forEach(function(h) {
+        var pulse = h.alpha + Math.sin(t + h.pulse) * 0.025;
+        drawHex(h.x, h.y, h.size, Math.max(0, pulse));
+      });
+
+      // Draw particles
+      particles.forEach(function(p) { p.update(); p.draw(); });
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+  })();
 
   // ── DISCORD STATUS via Lanyard ──
   var DISCORD_ID = '790275674785972245';
@@ -1369,12 +1484,23 @@ document.addEventListener('DOMContentLoaded', function() {
       dot.className  = 'discord-status-dot ' + s;
       text.textContent = labels[s] || 'Unknown';
 
-      // also update the online badge on avatar
+      // Update avatar online badge colour
       var badge = document.querySelector('.online-badge');
       if (badge) {
         var colors = { online:'#23a55a', idle:'#f0b232', dnd:'#f23f43', offline:'#80848e' };
         badge.style.background = colors[s] || '#80848e';
         badge.style.boxShadow  = '0 0 10px ' + (colors[s] || '#80848e');
+      }
+
+      // Spotify now playing
+      var sp = data.data.spotify;
+      var spWrap = document.getElementById('spotify-wrap');
+      if (sp && spWrap) {
+        document.getElementById('spotify-track').textContent  = sp.song   || '';
+        document.getElementById('spotify-artist').textContent = sp.artist || '';
+        spWrap.style.display = 'flex';
+      } else if (spWrap) {
+        spWrap.style.display = 'none';
       }
     })
     .catch(function() {
@@ -1676,6 +1802,18 @@ document.addEventListener('DOMContentLoaded', function() {
   window.closeAdmin = closeAdmin;
   window.checkAdminPass = checkAdminPass;
   window.clearVisitors = clearVisitors;
+
+  // Close mobile nav when tapping outside
+  document.addEventListener('click', function(e) {
+    var nav = document.getElementById('mobile-nav');
+    var burger = document.getElementById('hamburger');
+    if (nav && nav.classList.contains('open')) {
+      if (!nav.contains(e.target) && e.target !== burger && !burger.contains(e.target)) {
+        nav.classList.remove('open');
+        burger.classList.remove('open');
+      }
+    }
+  });
 
   // Close admin on overlay click
   document.getElementById('admin-overlay').addEventListener('click', function(e) {
