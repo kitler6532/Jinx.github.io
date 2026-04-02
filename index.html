@@ -953,165 +953,187 @@
     <a href="#hero" class="footer-back">↑ Back to Top</a>
   </div>
 </footer>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // Copy Discord username
   function copyDiscord(btn) {
-    navigator.clipboard.writeText('matei_royale').then(() => {
+    navigator.clipboard.writeText('matei_royale').then(function() {
       btn.textContent = 'copied!';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+      setTimeout(function() { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
     });
   }
+  window.copyDiscord = copyDiscord;
 
   // Cursor glow follow
-  const cursorGlow = document.getElementById('cursor-glow');
-  document.addEventListener('mousemove', e => {
-    cursorGlow.style.left = e.clientX + 'px';
-    cursorGlow.style.top  = e.clientY + 'px';
-  });
+  var cursorGlow = document.getElementById('cursor-glow');
+  if (cursorGlow) {
+    document.addEventListener('mousemove', function(e) {
+      cursorGlow.style.left = e.clientX + 'px';
+      cursorGlow.style.top  = e.clientY + 'px';
+    });
+  }
 
   // Particle burst on click
   function spawnParticles(x, y) {
-    for (let i = 0; i < 8; i++) {
-      const p = document.createElement('div');
-      const angle = (i / 8) * Math.PI * 2;
-      const dist  = 40 + Math.random() * 40;
-      p.style.cssText = `
-        position:fixed; width:6px; height:6px; border-radius:50%;
-        background: hsl(${270 + Math.random()*60}, 80%, 65%);
-        left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
-        transform:translate(-50%,-50%);
-        transition: transform .6s ease-out, opacity .6s ease-out;
-      `;
-      document.body.appendChild(p);
-      requestAnimationFrame(() => {
-        p.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
-        p.style.opacity = '0';
-      });
-      setTimeout(() => p.remove(), 650);
+    for (var i = 0; i < 8; i++) {
+      (function(i) {
+        var p = document.createElement('div');
+        var angle = (i / 8) * Math.PI * 2;
+        var dist  = 40 + Math.random() * 40;
+        p.style.cssText = 'position:fixed;width:6px;height:6px;border-radius:50%;background:hsl(' + (270 + Math.random()*60) + ',80%,65%);left:' + x + 'px;top:' + y + 'px;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .6s ease-out,opacity .6s ease-out;';
+        document.body.appendChild(p);
+        requestAnimationFrame(function() {
+          p.style.transform = 'translate(calc(-50% + ' + (Math.cos(angle)*dist) + 'px), calc(-50% + ' + (Math.sin(angle)*dist) + 'px))';
+          p.style.opacity = '0';
+        });
+        setTimeout(function() { p.remove(); }, 650);
+      })(i);
     }
   }
-  document.addEventListener('click', e => spawnParticles(e.clientX, e.clientY));
+  document.addEventListener('click', function(e) { spawnParticles(e.clientX, e.clientY); });
 
   // Theme toggle
-
   function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('theme-btn');
+    var body = document.body;
+    var btn = document.getElementById('theme-btn');
     body.classList.toggle('light');
-    if (body.classList.contains('light')) {
-      btn.textContent = '☀️ Light';
-    } else {
-      btn.textContent = '🌙 Dark';
-    }
+    btn.textContent = body.classList.contains('light') ? '☀️ Light' : '🌙 Dark';
   }
+  window.toggleTheme = toggleTheme;
 
-
-  // Scroll reveal
-
-  const reveals = document.querySelectorAll('.reveal');
-  const revealObserver = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        setTimeout(() => e.target.classList.add('visible'), i * 80);
-        revealObserver.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  reveals.forEach(el => revealObserver.observe(el));
-
-  // Animated counter function
+  // Animate count
   function animateCount(el, target, suffix, duration) {
-    const start = performance.now();
-    const update = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(ease * target);
+    var start = performance.now();
+    function update(now) {
+      var progress = Math.min((now - start) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      var current = Math.floor(ease * target);
       el.textContent = current.toLocaleString() + (suffix || '');
-      if (progress < 1) requestAnimationFrame(update);
-      else el.textContent = target.toLocaleString() + (suffix || '');
-    };
+      if (progress < 1) { requestAnimationFrame(update); }
+      else { el.textContent = target.toLocaleString() + (suffix || ''); }
+    }
     requestAnimationFrame(update);
   }
 
-  // Animate hero stats on load
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      document.querySelectorAll('.stat-num[data-count]').forEach(el => {
-        const target = parseInt(el.dataset.count);
-        const suffix = el.dataset.suffix || '';
-        animateCount(el, target, suffix, 2000);
-      });
-    }, 900);
+  // Animate hero stats via IntersectionObserver
+  var statObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        var target = parseInt(el.dataset.count);
+        var suffix = el.dataset.suffix || '';
+        setTimeout(function() { animateCount(el, target, suffix, 2000); }, 200);
+        statObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.stat-num[data-count]').forEach(function(el) {
+    el.textContent = '0' + (el.dataset.suffix || '');
+    statObserver.observe(el);
   });
 
-  // Animate card member counts when they scroll into view
-  const countObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
+  // Animate card member counts
+  var countObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
       if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseInt(el.dataset.count);
-        animateCount(el, target, '', 1400);
+        var el = entry.target;
+        animateCount(el, parseInt(el.dataset.count), '', 1400);
         countObserver.unobserve(el);
       }
     });
-  }, { threshold: 0.3 });
-  document.querySelectorAll('.count-badge[data-count]').forEach(el => countObserver.observe(el));
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.count-badge[data-count]').forEach(function(el) {
+    el.textContent = '0';
+    countObserver.observe(el);
+  });
 
-  // Form handlers
-  async function handleContact(e) {
-    e.preventDefault();
-    const btn = document.getElementById('contact-btn');
-    const status = document.getElementById('contact-status');
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-    try {
-      const res = await fetch('https://formspree.io/f/xreokjey', {
+  // Scroll reveal
+  var reveals = document.querySelectorAll('.reveal');
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e, i) {
+      if (e.isIntersecting) {
+        setTimeout(function() { e.target.classList.add('visible'); }, i * 80);
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(function(el) { revealObserver.observe(el); });
+
+  // Contact form
+  var contactForm = document.getElementById('contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('contact-btn');
+      var status = document.getElementById('contact-status');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      fetch('https://formspree.io/f/xreokjey', {
         method: 'POST',
-        body: new FormData(document.getElementById('contact-form')),
+        body: new FormData(contactForm),
         headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        status.textContent = 'Message sent! Jinx will get back to you soon.';
-        status.style.color = 'var(--purple-lt)';
-        status.style.display = 'block';
-        document.getElementById('contact-form').reset();
-      } else {
-        status.textContent = 'Something went wrong. Please try again or contact via Discord.';
+      }).then(function(res) {
+        if (res.ok) {
+          status.textContent = 'Message sent! Jinx will get back to you soon.';
+          status.style.color = 'var(--purple-lt)';
+          status.style.display = 'block';
+          contactForm.reset();
+        } else {
+          status.textContent = 'Something went wrong. Please contact via Discord.';
+          status.style.color = 'var(--pink)';
+          status.style.display = 'block';
+        }
+        btn.textContent = 'Send Message';
+        btn.disabled = false;
+      }).catch(function() {
+        status.textContent = 'Connection error. Please try again.';
         status.style.color = 'var(--pink)';
         status.style.display = 'block';
-      }
-    } catch {
-      status.textContent = 'Connection error. Please try again later.';
-      status.style.color = 'var(--pink)';
-      status.style.display = 'block';
-    }
-    btn.textContent = 'Send Message';
-    btn.disabled = false;
+        btn.textContent = 'Send Message';
+        btn.disabled = false;
+      });
+    });
   }
 
-  async function handleDMCA(e) {
-    e.preventDefault();
-    const btn = document.getElementById('dmca-btn');
-    const status = document.getElementById('dmca-status');
-    btn.textContent = 'Submitting...';
-    btn.disabled = true;
-    try {
-      const res = await fetch('https://formspree.io/f/xreokjey', {
+  // DMCA form
+  var dmcaForm = document.getElementById('dmca-form');
+  if (dmcaForm) {
+    dmcaForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('dmca-btn');
+      var status = document.getElementById('dmca-status');
+      btn.textContent = 'Submitting...';
+      btn.disabled = true;
+      fetch('https://formspree.io/f/xreokjey', {
         method: 'POST',
-        body: new FormData(document.getElementById('dmca-form')),
+        body: new FormData(dmcaForm),
         headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        status.textContent = 'Request submitted! Jinx will contact you at your email address.';
-        status.style.color = 'var(--purple-lt)';
-        status.style.display = 'block';
-        document.getElementById('dmca-form').reset();
-      } else {
-        status.textContent = 'Something went wrong. Please contact via Discord instead.';
+      }).then(function(res) {
+        if (res.ok) {
+          status.textContent = 'Request submitted! Jinx will contact you at your email.';
+          status.style.color = 'var(--purple-lt)';
+          status.style.display = 'block';
+          dmcaForm.reset();
+        } else {
+          status.textContent = 'Something went wrong. Please contact via Discord.';
+          status.style.color = 'var(--pink)';
+          status.style.display = 'block';
+        }
+        btn.textContent = 'Submit Request';
+        btn.disabled = false;
+      }).catch(function() {
+        status.textContent = 'Connection error. Please try again.';
         status.style.color = 'var(--pink)';
         status.style.display = 'block';
-      }
-    } catch {
-      status.textC
+        btn.textContent = 'Submit Request';
+        btn.disabled = false;
+      });
+    });
+  }
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
