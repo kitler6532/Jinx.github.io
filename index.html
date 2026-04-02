@@ -1694,7 +1694,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('admin-panel').classList.remove('open');
     document.getElementById('admin-step1').style.display = 'block';
     document.getElementById('admin-step2').style.display = 'none';
-    document.getElementById('admin-setup').style.display = 'none';
     document.getElementById('admin-pass').value = '';
     document.getElementById('admin-err').style.display = 'none';
   }
@@ -1702,7 +1701,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function backToStep1() {
     document.getElementById('admin-step1').style.display = 'block';
     document.getElementById('admin-step2').style.display = 'none';
-    document.getElementById('admin-setup').style.display = 'none';
     stopTOTPTimer();
   }
   function checkAdminPass() {
@@ -1710,15 +1708,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (pass === ADMIN_PASS) {
       document.getElementById('admin-step1').style.display = 'none';
       document.getElementById('admin-err').style.display = 'none';
-      if (localStorage.getItem('jx_totp_setup') === '1') {
-        document.getElementById('admin-step2').style.display = 'block';
-        document.getElementById('admin-totp').value = '';
-        document.getElementById('admin-totp-err').style.display = 'none';
-        startTOTPTimer();
-        setTimeout(function() { document.getElementById('admin-totp').focus(); }, 100);
-      } else {
-        document.getElementById('admin-setup').style.display = 'block';
-      }
+      // Always require TOTP — setup is permanent via the app
+      document.getElementById('admin-step2').style.display = 'block';
+      document.getElementById('admin-totp').value = '';
+      document.getElementById('admin-totp-err').style.display = 'none';
+      startTOTPTimer();
+      setTimeout(function() { document.getElementById('admin-totp').focus(); }, 100);
     } else {
       document.getElementById('admin-err').style.display = 'block';
       document.getElementById('admin-pass').value = '';
@@ -1739,22 +1734,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('admin-totp').focus();
     }
   }
-  async function confirmSetup() {
-    var input = document.getElementById('admin-setup-code').value.trim();
-    var ok = await verifyTOTP(input);
-    if (ok) {
-      localStorage.setItem('jx_totp_setup', '1');
-      document.getElementById('admin-setup').style.display = 'none';
-      document.getElementById('admin-step2').style.display = 'block';
-      document.getElementById('admin-totp').value = '';
-      document.getElementById('admin-totp-err').style.display = 'none';
-      startTOTPTimer();
-    } else {
-      document.getElementById('admin-setup-err').style.display = 'block';
-    }
-  }
   window.checkTOTP = checkTOTP;
-  window.confirmSetup = confirmSetup;
   window.backToStep1 = backToStep1;
 
   function loadAdminData() {
@@ -1853,17 +1833,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <p id="admin-totp-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Incorrect code. Try again.</p>
         <button onclick="backToStep1()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.8rem;font-family:'DM Mono',monospace;">Back</button>
       </div>
-      <div id="admin-setup" style="display:none;">
-        <div class="admin-title">&#x1F4F2; First Time Setup</div>
-        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;">Scan this QR code with Google Authenticator, then enter the code shown to confirm.</p>
-        <div style="text-align:center;margin-bottom:1rem;">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth%3A%2F%2Ftotp%2FJinxPortfolio%3Fsecret%3DYAFUXLMH2WIMVZBP%26issuer%3DJinxPortfolio" style="border-radius:8px;border:4px solid var(--bg);"/>
-        </div>
-        <p style="font-size:.68rem;color:var(--muted);text-align:center;margin-bottom:1rem;">Manual key (type exactly): <span style="color:var(--purple-lt);letter-spacing:.2em;font-size:.8rem;">YAFUXLMH2WIMVZBP</span></p>
-        <input class="admin-input" type="text" id="admin-setup-code" placeholder="Enter 6-digit code to confirm" maxlength="6" style="text-align:center;letter-spacing:.2em;" onkeydown="if(event.key==='Enter')confirmSetup()"/>
-        <button class="btn btn-primary" style="width:100%;margin-top:.3rem;" onclick="confirmSetup()">Confirm Setup</button>
-        <p id="admin-setup-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Code incorrect. Check your app and try again.</p>
-      </div>
+
     </div>
     <div class="admin-panel" id="admin-panel">
       <div class="admin-title">📊 Site Dashboard</div>
