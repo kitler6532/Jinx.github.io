@@ -1419,83 +1419,218 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Record this visit
   (function recordVisit() {
-    incVisits();
-    incTodayVisits();
+    var ua = navigator.userAgent;
 
-    // Unique visitor check via random ID stored in sessionStorage
-    var vid = sessionStorage.getItem('jx_vid');
-    if (!vid) {
-      vid = Math.random().toString(36).slice(2);
-      sessionStorage.setItem('jx_vid', vid);
+    // ── Detect browser ──
+    var browser = 'Unknown';
+    if (ua.indexOf('Edg') !== -1) browser = 'Edge';
+    else if (ua.indexOf('OPR') !== -1 || ua.indexOf('Opera') !== -1) browser = 'Opera';
+    else if (ua.indexOf('Firefox') !== -1) browser = 'Firefox';
+    else if (ua.indexOf('Chrome') !== -1) browser = 'Chrome';
+    else if (ua.indexOf('Safari') !== -1) browser = 'Safari';
+
+    // ── Detect OS / device name ──
+    var os = 'Unknown OS';
+    if (/Windows NT 10/.test(ua)) os = 'Windows 10/11';
+    else if (/Windows NT 6/.test(ua)) os = 'Windows 7/8';
+    else if (/Mac OS X/.test(ua) && !/iPhone|iPad/.test(ua)) os = 'macOS';
+    else if (/iPhone/.test(ua)) os = 'iPhone';
+    else if (/iPad/.test(ua)) os = 'iPad';
+    else if (/Android/.test(ua)) os = 'Android';
+    else if (/Linux/.test(ua)) os = 'Linux';
+    var isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+    var deviceType = isMobile ? 'Mobile' : 'Desktop';
+    var deviceName = os + ' / ' + browser;
+
+    var ref = document.referrer ? (function(){ try { return new URL(document.referrer).hostname; } catch(e) { return 'Direct'; } })() : 'Direct';
+
+    // ── Unique visitor fingerprint (per device+browser, persists across sessions) ──
+    var fp = localStorage.getItem('jx_fp');
+    if (!fp) {
+      fp = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      localStorage.setItem('jx_fp', fp);
+    }
+
+    // ── Only count as a new visit once per day per device ──
+    var todayKey = 'jx_visited_' + new Date().toISOString().slice(0,10) + '_' + fp;
+    var alreadyVisitedToday = localStorage.getItem(todayKey);
+
+    // ── Track unique visitors (one per device ever) ──
+    var isNewUnique = !localStorage.getItem('jx_unique_' + fp);
+    if (isNewUnique) {
+      localStorage.setItem('jx_unique_' + fp, '1');
       var ids = JSON.parse(localStorage.getItem('jx_unique_ids') || '[]');
-      ids.push(vid);
+      ids.push(fp);
       localStorage.setItem('jx_unique_ids', JSON.stringify(ids));
     }
 
-    // Get browser/device info
-    var ua = navigator.userAgent;
-    var browser = 'Unknown';
-    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
-    else if (ua.includes('Firefox')) browser = 'Firefox';
-    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
-    else if (ua.includes('Edg')) browser = 'Edge';
-    else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
+    if (!alreadyVisitedToday) {
+      // Mark visited today
+      localStorage.setItem(todayKey, '1');
+      incVisits();
+      incTodayVisits();
 
-    var device = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop';
-    var ref = document.referrer ? new URL(document.referrer).hostname : 'Direct';
-
-    // Get country via free IP API
-    fetch('https://ipapi.co/json/')
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        var visitor = {
-          time: new Date().toLocaleString(),
-          country: (d.country_name || 'Unknown') + ' ' + (d.country_code ? '' : ''),
-          flag: d.country_code ? String.fromCodePoint(...[...d.country_code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '',
-          browser: browser,
-          device: device,
-          referrer: ref,
-          city: d.city || ''
-        };
-        var visitors = getVisitors();
-        visitors.unshift(visitor);
-        if (visitors.length > 50) visitors = visitors.slice(0, 50);
-        saveVisitors(visitors);
-      })
-      .catch(function() {
-        var visitor = {
-          time: new Date().toLocaleString(),
-          country: 'Unknown', flag: '', browser: browser,
-          device: device, referrer: ref, city: ''
-        };
-        var visitors = getVisitors();
-        visitors.unshift(visitor);
-        if (visitors.length > 50) visitors = visitors.slice(0, 50);
-        saveVisitors(visitors);
-      });
+      // ── Fetch location and save visitor record ──
+      fetch('https://ipapi.co/json/')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var flag = '';
+          if (d.country_code) {
+            try {
+              flag = Array.from(d.country_code).map(function(c) {
+                return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65);
+              }).join('');
+            } catch(e) {}
+          }
+          var visitor = {
+            time: new Date().toLocaleString(),
+            country: d.country_name || 'Unknown',
+            city: d.city || '',
+            flag: flag,
+            browser: browser,
+            device: deviceType,
+            deviceName: deviceName,
+            referrer: ref,
+            isNew: isNewUnique ? 'First visit' : 'Returning'
+          };
+          var visitors = getVisitors();
+          visitors.unshift(visitor);
+          if (visitors.length > 100) visitors = visitors.slice(0, 100);
+          saveVisitors(visitors);
+        })
+        .catch(function() {
+          var visitor = {
+            time: new Date().toLocaleString(),
+            country: 'Unknown', city: '', flag: '',
+            browser: browser, device: deviceType,
+            deviceName: deviceName, referrer: ref,
+            isNew: isNewUnique ? 'First visit' : 'Returning'
+          };
+          var visitors = getVisitors();
+          visitors.unshift(visitor);
+          if (visitors.length > 100) visitors = visitors.slice(0, 100);
+          saveVisitors(visitors);
+        });
+    }
   })();
+
+  // TOTP helpers
+  var TOTP_SECRET_KEY = 'YAFUXLMH2WIMVZBP';
+  function base32ToBytes(b32) {
+    var alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    var bits = 0, val = 0, out = [];
+    // Remove spaces, padding, lowercase
+    b32 = b32.replace(/\s/g,'').replace(/=+$/,'').toUpperCase();
+    for (var i = 0; i < b32.length; i++) {
+      var idx = alpha.indexOf(b32[i]);
+      if (idx === -1) continue; // skip invalid chars
+      val = (val << 5) | idx;
+      bits += 5;
+      if (bits >= 8) { out.push((val >>> (bits - 8)) & 0xff); bits -= 8; }
+    }
+    return new Uint8Array(out);
+  }
+  async function getTOTPCode(ts) {
+    var counter = Math.floor((ts || Date.now() / 1000) / 30);
+    var key = base32ToBytes(TOTP_SECRET_KEY);
+    var msg = new Uint8Array(8);
+    for (var i = 7; i >= 0; i--) { msg[i] = counter & 0xff; counter = counter >>> 8; }
+    var ck = await crypto.subtle.importKey('raw', key, {name:'HMAC',hash:'SHA-1'}, false, ['sign']);
+    var sig = new Uint8Array(await crypto.subtle.sign('HMAC', ck, msg));
+    var off = sig[19] & 0x0f;
+    var code = ((sig[off]&0x7f)<<24)|(sig[off+1]<<16)|(sig[off+2]<<8)|sig[off+3];
+    return String(code % 1000000).padStart(6, '0');
+  }
+  async function verifyTOTP(input) {
+    var now = Math.floor(Date.now() / 1000);
+    for (var d = -1; d <= 1; d++) {
+      if ((await getTOTPCode(now + d * 30)) === input) return true;
+    }
+    return false;
+  }
+  var totpTimer = null;
+  function startTOTPTimer() {
+    function tick() {
+      var sec = 30 - (Math.floor(Date.now() / 1000) % 30);
+      var ring = document.getElementById('totp-ring-circle');
+      var num  = document.getElementById('totp-timer-num');
+      if (ring) { ring.setAttribute('stroke-dashoffset', 94.25 - (94.25 * sec / 30)); ring.setAttribute('stroke', sec <= 5 ? '#f23f43' : 'var(--purple-lt)'); }
+      if (num)  num.textContent = sec;
+    }
+    tick(); totpTimer = setInterval(tick, 1000);
+  }
+  function stopTOTPTimer() { if (totpTimer) { clearInterval(totpTimer); totpTimer = null; } }
 
   // ── ADMIN PANEL ──
   function openAdmin() {
     document.getElementById('admin-overlay').classList.add('open');
     document.getElementById('admin-login').style.display = 'block';
     document.getElementById('admin-panel').classList.remove('open');
+    document.getElementById('admin-step1').style.display = 'block';
+    document.getElementById('admin-step2').style.display = 'none';
+    document.getElementById('admin-setup').style.display = 'none';
     document.getElementById('admin-pass').value = '';
     document.getElementById('admin-err').style.display = 'none';
   }
-  function closeAdmin() {
-    document.getElementById('admin-overlay').classList.remove('open');
+  function closeAdmin() { document.getElementById('admin-overlay').classList.remove('open'); stopTOTPTimer(); }
+  function backToStep1() {
+    document.getElementById('admin-step1').style.display = 'block';
+    document.getElementById('admin-step2').style.display = 'none';
+    document.getElementById('admin-setup').style.display = 'none';
+    stopTOTPTimer();
   }
   function checkAdminPass() {
     var pass = document.getElementById('admin-pass').value;
     if (pass === ADMIN_PASS) {
+      document.getElementById('admin-step1').style.display = 'none';
+      document.getElementById('admin-err').style.display = 'none';
+      if (localStorage.getItem('jx_totp_setup') === '1') {
+        document.getElementById('admin-step2').style.display = 'block';
+        document.getElementById('admin-totp').value = '';
+        document.getElementById('admin-totp-err').style.display = 'none';
+        startTOTPTimer();
+        setTimeout(function() { document.getElementById('admin-totp').focus(); }, 100);
+      } else {
+        document.getElementById('admin-setup').style.display = 'block';
+      }
+    } else {
+      document.getElementById('admin-err').style.display = 'block';
+      document.getElementById('admin-pass').value = '';
+    }
+  }
+  async function checkTOTP() {
+    var input = document.getElementById('admin-totp').value.trim();
+    if (input.length !== 6) { document.getElementById('admin-totp-err').style.display = 'block'; return; }
+    var ok = await verifyTOTP(input);
+    if (ok) {
+      stopTOTPTimer();
       document.getElementById('admin-login').style.display = 'none';
       document.getElementById('admin-panel').classList.add('open');
       loadAdminData();
     } else {
-      document.getElementById('admin-err').style.display = 'block';
+      document.getElementById('admin-totp-err').style.display = 'block';
+      document.getElementById('admin-totp').value = '';
+      document.getElementById('admin-totp').focus();
     }
   }
+  async function confirmSetup() {
+    var input = document.getElementById('admin-setup-code').value.trim();
+    var ok = await verifyTOTP(input);
+    if (ok) {
+      localStorage.setItem('jx_totp_setup', '1');
+      document.getElementById('admin-setup').style.display = 'none';
+      document.getElementById('admin-step2').style.display = 'block';
+      document.getElementById('admin-totp').value = '';
+      document.getElementById('admin-totp-err').style.display = 'none';
+      startTOTPTimer();
+    } else {
+      document.getElementById('admin-setup-err').style.display = 'block';
+    }
+  }
+  window.checkTOTP = checkTOTP;
+  window.confirmSetup = confirmSetup;
+  window.backToStep1 = backToStep1;
+
   function loadAdminData() {
     var visitors = getVisitors();
     document.getElementById('adm-total').textContent  = getTotalVisits().toLocaleString();
@@ -1509,16 +1644,32 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     tbody.innerHTML = visitors.map(function(v) {
-      return '<tr><td>' + v.time + '</td><td>' + v.flag + ' ' + v.country + (v.city ? ' (' + v.city + ')' : '') + '</td><td>' + v.browser + '</td><td>' + v.device + '</td><td>' + v.referrer + '</td></tr>';
+      var statusColor = v.isNew === 'First visit' ? '#23a55a' : '#a855f7';
+      return '<tr>'
+        + '<td>' + (v.time||'') + '</td>'
+        + '<td>' + (v.flag||'') + ' ' + (v.country||'Unknown') + (v.city ? ' ('+v.city+')' : '') + '</td>'
+        + '<td>' + (v.deviceName||v.device||'Unknown') + '</td>'
+        + '<td>' + (v.browser||'Unknown') + '</td>'
+        + '<td style="color:'+statusColor+';">' + (v.isNew||'Returning') + '</td>'
+        + '<td>' + (v.referrer||'Direct') + '</td>'
+        + '</tr>';
     }).join('');
   }
   function clearVisitors() {
-    if (confirm('Clear all visitor data?')) {
-      localStorage.removeItem('jx_visitors');
-      localStorage.removeItem('jx_total');
-      localStorage.removeItem('jx_unique_ids');
-      Object.keys(localStorage).filter(function(k) { return k.startsWith('jx_today_'); }).forEach(function(k) { localStorage.removeItem(k); });
-      loadAdminData();
+    if (confirm('Clear all visitor data? This cannot be undone.')) {
+      // Remove all jx_ keys
+      var toRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('jx_') === 0) toRemove.push(k);
+      }
+      toRemove.forEach(function(k) { localStorage.removeItem(k); });
+      // Re-render panel
+      document.getElementById('adm-total').textContent  = '0';
+      document.getElementById('adm-today').textContent  = '0';
+      document.getElementById('adm-unique').textContent = '0';
+      document.getElementById('adm-pages').textContent  = '0';
+      document.getElementById('visitor-tbody').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:1rem;">No visitors recorded yet.</td></tr>';
     }
   }
   window.openAdmin = openAdmin;
@@ -1539,10 +1690,42 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="admin-box" style="position:relative; max-height:85vh; overflow-y:auto;">
     <button class="admin-close" onclick="closeAdmin()">✕</button>
     <div id="admin-login">
-      <div class="admin-title">🔐 Admin Access</div>
-      <input class="admin-input" type="password" id="admin-pass" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdminPass()"/>
-      <button class="btn btn-primary" style="width:100%;" onclick="checkAdminPass()">Login</button>
-      <p id="admin-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Incorrect password.</p>
+      <div id="admin-step1">
+        <div class="admin-title">&#x1F510; Admin Access</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;">Step 1 of 2 &#8212; Enter your password</p>
+        <input class="admin-input" type="password" id="admin-pass" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdminPass()"/>
+        <button class="btn btn-primary" style="width:100%;margin-top:.3rem;" onclick="checkAdminPass()">Continue</button>
+        <p id="admin-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Incorrect password.</p>
+      </div>
+      <div id="admin-step2" style="display:none;">
+        <div class="admin-title">&#x1F4F1; Authenticator Code</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;">Step 2 of 2 &#8212; Enter the 6-digit code from your authenticator app</p>
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;">
+          <div style="position:relative;width:38px;height:38px;flex-shrink:0;">
+            <svg width="38" height="38" style="transform:rotate(-90deg);">
+              <circle cx="19" cy="19" r="15" fill="none" stroke="var(--border)" stroke-width="3"/>
+              <circle id="totp-ring-circle" cx="19" cy="19" r="15" fill="none" stroke="var(--purple-lt)" stroke-width="3" stroke-dasharray="94.25" stroke-dashoffset="0"/>
+            </svg>
+            <span id="totp-timer-num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--purple-lt);font-family:DM Mono,monospace;">30</span>
+          </div>
+          <p style="font-size:.72rem;color:var(--muted);">Code refreshes every 30 seconds</p>
+        </div>
+        <input class="admin-input" type="text" id="admin-totp" placeholder="000000" maxlength="6" style="font-size:1.4rem;letter-spacing:.3em;text-align:center;" onkeydown="if(event.key==='Enter')checkTOTP()" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+        <button class="btn btn-primary" style="width:100%;margin-top:.3rem;" onclick="checkTOTP()">Verify</button>
+        <p id="admin-totp-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Incorrect code. Try again.</p>
+        <button onclick="backToStep1()" style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;margin-top:.8rem;font-family:'DM Mono',monospace;">Back</button>
+      </div>
+      <div id="admin-setup" style="display:none;">
+        <div class="admin-title">&#x1F4F2; First Time Setup</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;">Scan this QR code with Google Authenticator, then enter the code shown to confirm.</p>
+        <div style="text-align:center;margin-bottom:1rem;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth%3A%2F%2Ftotp%2FJinxPortfolio%3Fsecret%3DYAFUXLMH2WIMVZBP%26issuer%3DJinxPortfolio" style="border-radius:8px;border:4px solid var(--bg);"/>
+        </div>
+        <p style="font-size:.68rem;color:var(--muted);text-align:center;margin-bottom:1rem;">Manual key (type exactly): <span style="color:var(--purple-lt);letter-spacing:.2em;font-size:.8rem;">YAFUXLMH2WIMVZBP</span></p>
+        <input class="admin-input" type="text" id="admin-setup-code" placeholder="Enter 6-digit code to confirm" maxlength="6" style="text-align:center;letter-spacing:.2em;" onkeydown="if(event.key==='Enter')confirmSetup()"/>
+        <button class="btn btn-primary" style="width:100%;margin-top:.3rem;" onclick="confirmSetup()">Confirm Setup</button>
+        <p id="admin-setup-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Code incorrect. Check your app and try again.</p>
+      </div>
     </div>
     <div class="admin-panel" id="admin-panel">
       <div class="admin-title">📊 Site Dashboard</div>
@@ -1571,8 +1754,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <tr>
               <th>Time</th>
               <th>Country</th>
-              <th>Browser</th>
               <th>Device</th>
+              <th>Browser / OS</th>
+              <th>Status</th>
               <th>Referrer</th>
             </tr>
           </thead>
