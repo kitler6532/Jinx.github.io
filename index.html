@@ -212,16 +212,45 @@
     .btn-ghost:hover { border-color: var(--purple-lt); color: var(--purple-lt); }
 
     .hero-stats {
-      display: flex; gap: 3rem; margin-top: 5rem;
+      display: flex; gap: 4rem; margin-top: 5rem;
       padding-top: 2.5rem; border-top: 1px solid var(--border);
       opacity: 0; animation: fadeUp .7s .8s forwards;
       flex-wrap: wrap;
     }
-    .stat-num {
-      font-family: 'Syne', sans-serif; font-size: 2.2rem;
-      font-weight: 800; color: var(--purple-lt);
+    .hero-stats > div {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
     }
-    .stat-label { font-size: .75rem; color: var(--muted); letter-spacing: .06em; }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--purple-lt);
+      line-height: 1;
+      letter-spacing: -.03em;
+      display: block;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+    .stat-num.counted {
+      animation: stat-pulse 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes stat-pulse {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+    .stat-label {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      margin-top: .5rem;
+      display: block;
+      white-space: nowrap;
+    }
 
     .section { padding: 7rem 6vw; border-top: 1px solid var(--border); }
     .section-label {
@@ -589,15 +618,141 @@
     }
     .contact-note strong { color: var(--purple-lt); }
 
-    @media (max-width: 700px) {
-      .about-grid, .contact-wrap { grid-template-columns: 1fr; gap: 2.5rem; }
-      .hero-stats { gap: 1.8rem; }
-      nav { padding: 1rem 5vw; }
-      .nav-links { display: none; }
+
+    /* ── PAGE TRANSITION ── */
+    #page-transition {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--purple);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .4s cubic-bezier(.77,0,.18,1);
+      pointer-events: none;
     }
+    #page-transition.slide-in  { transform: scaleX(1); transform-origin: left; }
+    #page-transition.slide-out { transform: scaleX(0); transform-origin: right; }
+
+    /* ── HAMBURGER MENU ── */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: .3rem;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--text); border-radius: 2px;
+      transition: transform .3s, opacity .3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-nav {
+      display: none; position: fixed; inset: 0; top: 60px;
+      background: rgba(8,8,16,.97); backdrop-filter: blur(16px);
+      z-index: 98; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      color: var(--text); text-decoration: none;
+      font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700;
+      letter-spacing: -.02em;
+      transition: color .2s;
+    }
+    .mobile-nav a:hover { color: var(--purple-lt); }
+
+    /* ── DISCORD STATUS ── */
+    .discord-status-wrap {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: .35rem 1rem;
+      font-size: .75rem; color: var(--muted); margin-bottom: 1rem;
+    }
+    .discord-status-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+      background: var(--muted);
+    }
+    .discord-status-dot.online  { background: #23a55a; box-shadow: 0 0 6px #23a55a; }
+    .discord-status-dot.idle    { background: #f0b232; box-shadow: 0 0 6px #f0b232; }
+    .discord-status-dot.dnd     { background: #f23f43; box-shadow: 0 0 6px #f23f43; }
+    .discord-status-dot.offline { background: #80848e; }
+    .discord-status-text { color: var(--text); font-weight: 500; }
+
+    /* ── ADMIN PANEL ── */
+    #admin-overlay {
+      display: none; position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,.85); backdrop-filter: blur(10px);
+      align-items: center; justify-content: center;
+    }
+    #admin-overlay.open { display: flex; }
+    .admin-box {
+      background: var(--surface); border: 1px solid var(--purple);
+      border-radius: 12px; padding: 2.5rem; width: 90%; max-width: 520px;
+      box-shadow: 0 0 60px rgba(124,58,237,.3);
+    }
+    .admin-title {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+      margin-bottom: 1.5rem; color: var(--purple-lt);
+    }
+    .admin-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 4px; padding: .75rem 1rem;
+      font-family: 'DM Mono', monospace; font-size: .9rem; outline: none;
+      transition: border-color .2s; margin-bottom: 1rem;
+    }
+    .admin-input:focus { border-color: var(--purple); }
+    .admin-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--muted);
+      font-size: 1.2rem; cursor: pointer; transition: color .2s;
+    }
+    .admin-close:hover { color: var(--text); }
+    .admin-panel { display: none; }
+    .admin-panel.open { display: block; }
+    .admin-stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .admin-stat-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.2rem; text-align: center;
+    }
+    .admin-stat-num {
+      font-family: 'Syne', sans-serif; font-size: 1.8rem;
+      font-weight: 800; color: var(--purple-lt);
+    }
+    .admin-stat-label { font-size: .72rem; color: var(--muted); margin-top: .3rem; }
+    .visitor-table {
+      width: 100%; border-collapse: collapse; font-size: .75rem; margin-top: 1rem;
+    }
+    .visitor-table th {
+      text-align: left; color: var(--muted); padding: .4rem .6rem;
+      border-bottom: 1px solid var(--border); font-weight: 400; letter-spacing: .06em;
+    }
+    .visitor-table td {
+      padding: .5rem .6rem; border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--text); vertical-align: top;
+    }
+    .visitor-table tr:last-child td { border-bottom: none; }
+    .admin-btn-row { display: flex; gap: .6rem; margin-top: 1.2rem; flex-wrap: wrap; }
+    .admin-danger {
+      background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4);
+      color: #f87171; border-radius: 4px; padding: .4rem .9rem;
+      font-family: 'DM Mono', monospace; font-size: .75rem; cursor: pointer;
+      transition: background .2s;
+    }
+    .admin-danger:hover { background: rgba(239,68,68,.3); }
+
+    @media (max-width: 700px) {
+      .hamburger { display: flex; }
+      .nav-links, .theme-toggle { display: none; }
+      .about-grid, .contact-wrap { grid-template-columns: 1fr; gap: 2.5rem; }
+      .hero-stats { gap: 2rem; }
+      .hero-layout { flex-direction: column-reverse; gap: 2rem; }
+      .hero-avatar { width: 150px; height: 150px; }
+    }
+
   </style>
 </head>
 <body>
+
+<div id="page-transition"></div>
 
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
@@ -620,11 +775,29 @@
     <li><a href="#dmca">DMCA</a></li>
   </ul>
   <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#about"    onclick="closeMobileNav()">About</a>
+  <a href="#discord"  onclick="closeMobileNav()">Discord</a>
+  <a href="#projects" onclick="closeMobileNav()">Projects</a>
+  <a href="#why"      onclick="closeMobileNav()">Why Me</a>
+  <a href="#contact"  onclick="closeMobileNav()">Contact</a>
+  <a href="#dmca"     onclick="closeMobileNav()">DMCA</a>
+</div>
 
 <section id="hero">
   <div class="hero-layout">
     <div class="hero-text">
+      <div class="discord-status-wrap" id="discord-status-wrap">
+        <div class="discord-status-dot" id="discord-status-dot"></div>
+        <span class="discord-status-text" id="discord-status-text">Fetching status...</span>
+        <span style="color:var(--muted);font-size:.7rem;">on Discord</span>
+      </div>
       <div class="last-updated">Last updated <span>02 April 2026</span></div>
       <p class="hero-tag">Moderation Portfolio</p>
       <h1>
@@ -951,6 +1124,7 @@
     <span class="footer-logo">Jinx</span>
     <span style="color:var(--muted); font-size:.78rem;">Matei_Royale on Discord and Roblox &nbsp;·&nbsp; <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f1516110708100d140f100b19101613103f18121e1613511c1012">[email&#160;protected]</a></span>
     <a href="#hero" class="footer-back">↑ Back to Top</a>
+    <button onclick="openAdmin()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:.4rem .9rem;font-family:'DM Mono',monospace;font-size:.72rem;cursor:pointer;letter-spacing:.05em;transition:all .2s;" onmouseover="this.style.borderColor='var(--purple-lt)';this.style.color='var(--purple-lt)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">⚙ Admin</button>
   </div>
 </footer>
 <script>
@@ -1004,15 +1178,19 @@ document.addEventListener('DOMContentLoaded', function() {
   window.toggleTheme = toggleTheme;
 
   // Animate count
-  function animateCount(el, target, suffix, duration) {
+  function animateCount(el, target, suffix, duration, callback) {
     var start = performance.now();
     function update(now) {
       var progress = Math.min((now - start) / duration, 1);
       var ease = 1 - Math.pow(1 - progress, 3);
       var current = Math.floor(ease * target);
       el.textContent = current.toLocaleString() + (suffix || '');
-      if (progress < 1) { requestAnimationFrame(update); }
-      else { el.textContent = target.toLocaleString() + (suffix || ''); }
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target.toLocaleString() + (suffix || '');
+        if (callback) callback();
+      }
     }
     requestAnimationFrame(update);
   }
@@ -1024,13 +1202,21 @@ document.addEventListener('DOMContentLoaded', function() {
         var el = entry.target;
         var target = parseInt(el.dataset.count);
         var suffix = el.dataset.suffix || '';
-        setTimeout(function() { animateCount(el, target, suffix, 2000); }, 200);
+        var delay = parseInt(el.dataset.delay || '0');
+        setTimeout(function() {
+          animateCount(el, target, suffix, 1800, function() {
+            // stagger the pulse so each stat bounces at slightly different times
+            setTimeout(function() { el.classList.add('counted'); }, delay * 150);
+          });
+        }, 200 + delay * 100);
         statObserver.unobserve(el);
       }
     });
   }, { threshold: 0.2 });
-  document.querySelectorAll('.stat-num[data-count]').forEach(function(el) {
+  var statEls = document.querySelectorAll('.stat-num[data-count]');
+  statEls.forEach(function(el, i) {
     el.textContent = '0' + (el.dataset.suffix || '');
+    el.dataset.delay = i;
     statObserver.observe(el);
   });
 
@@ -1133,7 +1319,274 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // ── HAMBURGER MENU ──
+  function toggleMobileNav() {
+    var nav = document.getElementById('mobile-nav');
+    var btn = document.getElementById('hamburger');
+    nav.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+  function closeMobileNav() {
+    document.getElementById('mobile-nav').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  }
+  window.toggleMobileNav = toggleMobileNav;
+  window.closeMobileNav = closeMobileNav;
+
+  // ── PAGE TRANSITION on nav clicks ──
+  var pt = document.getElementById('page-transition');
+  function doTransition(href) {
+    pt.classList.add('slide-in');
+    setTimeout(function() {
+      var target = document.querySelector(href);
+      if (target) target.scrollIntoView({ behavior: 'auto' });
+      pt.classList.remove('slide-in');
+      pt.classList.add('slide-out');
+      setTimeout(function() { pt.classList.remove('slide-out'); }, 400);
+    }, 400);
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var href = a.getAttribute('href');
+      if (href && href.length > 1) {
+        e.preventDefault();
+        closeMobileNav();
+        doTransition(href);
+      }
+    });
+  });
+
+  // ── DISCORD STATUS via Lanyard ──
+  var DISCORD_ID = '790275674785972245';
+  fetch('https://api.lanyard.rest/v1/users/' + DISCORD_ID)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) return;
+      var dot  = document.getElementById('discord-status-dot');
+      var text = document.getElementById('discord-status-text');
+      var s = data.data.discord_status;
+      var labels = { online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline' };
+      dot.className  = 'discord-status-dot ' + s;
+      text.textContent = labels[s] || 'Unknown';
+
+      // also update the online badge on avatar
+      var badge = document.querySelector('.online-badge');
+      if (badge) {
+        var colors = { online:'#23a55a', idle:'#f0b232', dnd:'#f23f43', offline:'#80848e' };
+        badge.style.background = colors[s] || '#80848e';
+        badge.style.boxShadow  = '0 0 10px ' + (colors[s] || '#80848e');
+      }
+    })
+    .catch(function() {
+      var text = document.getElementById('discord-status-text');
+      if (text) text.textContent = 'matei_royale';
+    });
+
+  // ── VISITOR TRACKING (localStorage) ──
+  var ADMIN_PASS = 'Jinx2026';
+
+  function getVisitors() {
+    try { return JSON.parse(localStorage.getItem('jx_visitors') || '[]'); } catch(e) { return []; }
+  }
+  function saveVisitors(v) {
+    try { localStorage.setItem('jx_visitors', JSON.stringify(v)); } catch(e) {}
+  }
+  function getTotalVisits() {
+    return parseInt(localStorage.getItem('jx_total') || '0');
+  }
+  function incVisits() {
+    var t = getTotalVisits() + 1;
+    localStorage.setItem('jx_total', t);
+    return t;
+  }
+  function getTodayKey() {
+    return new Date().toISOString().slice(0,10);
+  }
+  function getTodayVisits() {
+    var key = 'jx_today_' + getTodayKey();
+    return parseInt(localStorage.getItem(key) || '0');
+  }
+  function incTodayVisits() {
+    var key = 'jx_today_' + getTodayKey();
+    var t = getTodayVisits() + 1;
+    localStorage.setItem(key, t);
+    return t;
+  }
+  function getUniqueVisitors() {
+    var ids = JSON.parse(localStorage.getItem('jx_unique_ids') || '[]');
+    return ids.length;
+  }
+
+  // Record this visit
+  (function recordVisit() {
+    incVisits();
+    incTodayVisits();
+
+    // Unique visitor check via random ID stored in sessionStorage
+    var vid = sessionStorage.getItem('jx_vid');
+    if (!vid) {
+      vid = Math.random().toString(36).slice(2);
+      sessionStorage.setItem('jx_vid', vid);
+      var ids = JSON.parse(localStorage.getItem('jx_unique_ids') || '[]');
+      ids.push(vid);
+      localStorage.setItem('jx_unique_ids', JSON.stringify(ids));
+    }
+
+    // Get browser/device info
+    var ua = navigator.userAgent;
+    var browser = 'Unknown';
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+    else if (ua.includes('Edg')) browser = 'Edge';
+    else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
+
+    var device = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop';
+    var ref = document.referrer ? new URL(document.referrer).hostname : 'Direct';
+
+    // Get country via free IP API
+    fetch('https://ipapi.co/json/')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var visitor = {
+          time: new Date().toLocaleString(),
+          country: (d.country_name || 'Unknown') + ' ' + (d.country_code ? '' : ''),
+          flag: d.country_code ? String.fromCodePoint(...[...d.country_code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '',
+          browser: browser,
+          device: device,
+          referrer: ref,
+          city: d.city || ''
+        };
+        var visitors = getVisitors();
+        visitors.unshift(visitor);
+        if (visitors.length > 50) visitors = visitors.slice(0, 50);
+        saveVisitors(visitors);
+      })
+      .catch(function() {
+        var visitor = {
+          time: new Date().toLocaleString(),
+          country: 'Unknown', flag: '', browser: browser,
+          device: device, referrer: ref, city: ''
+        };
+        var visitors = getVisitors();
+        visitors.unshift(visitor);
+        if (visitors.length > 50) visitors = visitors.slice(0, 50);
+        saveVisitors(visitors);
+      });
+  })();
+
+  // ── ADMIN PANEL ──
+  function openAdmin() {
+    document.getElementById('admin-overlay').classList.add('open');
+    document.getElementById('admin-login').style.display = 'block';
+    document.getElementById('admin-panel').classList.remove('open');
+    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-err').style.display = 'none';
+  }
+  function closeAdmin() {
+    document.getElementById('admin-overlay').classList.remove('open');
+  }
+  function checkAdminPass() {
+    var pass = document.getElementById('admin-pass').value;
+    if (pass === ADMIN_PASS) {
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-panel').classList.add('open');
+      loadAdminData();
+    } else {
+      document.getElementById('admin-err').style.display = 'block';
+    }
+  }
+  function loadAdminData() {
+    var visitors = getVisitors();
+    document.getElementById('adm-total').textContent  = getTotalVisits().toLocaleString();
+    document.getElementById('adm-today').textContent  = getTodayVisits().toLocaleString();
+    document.getElementById('adm-unique').textContent = getUniqueVisitors().toLocaleString();
+    document.getElementById('adm-pages').textContent  = getTotalVisits().toLocaleString();
+
+    var tbody = document.getElementById('visitor-tbody');
+    if (visitors.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:1rem;">No visitors recorded yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = visitors.map(function(v) {
+      return '<tr><td>' + v.time + '</td><td>' + v.flag + ' ' + v.country + (v.city ? ' (' + v.city + ')' : '') + '</td><td>' + v.browser + '</td><td>' + v.device + '</td><td>' + v.referrer + '</td></tr>';
+    }).join('');
+  }
+  function clearVisitors() {
+    if (confirm('Clear all visitor data?')) {
+      localStorage.removeItem('jx_visitors');
+      localStorage.removeItem('jx_total');
+      localStorage.removeItem('jx_unique_ids');
+      Object.keys(localStorage).filter(function(k) { return k.startsWith('jx_today_'); }).forEach(function(k) { localStorage.removeItem(k); });
+      loadAdminData();
+    }
+  }
+  window.openAdmin = openAdmin;
+  window.closeAdmin = closeAdmin;
+  window.checkAdminPass = checkAdminPass;
+  window.clearVisitors = clearVisitors;
+
+  // Close admin on overlay click
+  document.getElementById('admin-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAdmin();
+  });
+
 }); // end DOMContentLoaded
 </script>
+
+<!-- ADMIN PANEL -->
+<div id="admin-overlay">
+  <div class="admin-box" style="position:relative; max-height:85vh; overflow-y:auto;">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+    <div id="admin-login">
+      <div class="admin-title">🔐 Admin Access</div>
+      <input class="admin-input" type="password" id="admin-pass" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdminPass()"/>
+      <button class="btn btn-primary" style="width:100%;" onclick="checkAdminPass()">Login</button>
+      <p id="admin-err" style="color:var(--pink);font-size:.78rem;margin-top:.6rem;display:none;">Incorrect password.</p>
+    </div>
+    <div class="admin-panel" id="admin-panel">
+      <div class="admin-title">📊 Site Dashboard</div>
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="adm-total">0</div>
+          <div class="admin-stat-label">Total Visits</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="adm-today">0</div>
+          <div class="admin-stat-label">Visits Today</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="adm-unique">0</div>
+          <div class="admin-stat-label">Unique Visitors</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-num" id="adm-pages">0</div>
+          <div class="admin-stat-label">Page Views</div>
+        </div>
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:.8rem;color:var(--muted);">RECENT VISITORS</div>
+      <div style="overflow-x:auto;">
+        <table class="visitor-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Country</th>
+              <th>Browser</th>
+              <th>Device</th>
+              <th>Referrer</th>
+            </tr>
+          </thead>
+          <tbody id="visitor-tbody">
+            <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:1rem;">Loading visitor data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-btn-row">
+        <button class="admin-danger" onclick="clearVisitors()">Clear All Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
