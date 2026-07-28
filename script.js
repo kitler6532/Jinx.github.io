@@ -363,45 +363,52 @@ window.addEventListener('scroll', function() {
 
 
 
-/* ===== Discord badges from Lanyard public_flags ===== */
-const FLAG_BADGES = [
-  { bit: 1 << 0,  name: 'Staff' },
-  { bit: 1 << 1,  name: 'Partner' },
-  { bit: 1 << 2,  name: 'Hypesquad' },
-  { bit: 1 << 3,  name: 'Bug Hunter' },
-  { bit: 1 << 6,  name: 'Hype Bravery' },
-  { bit: 1 << 7,  name: 'Hype Brilliance' },
-  { bit: 1 << 8,  name: 'Hype Balance' },
-  { bit: 1 << 9,  name: 'Early Supporter' },
-  { bit: 1 << 14, name: 'Bug Hunter+' },
-  { bit: 1 << 17, name: 'Verified Bot Dev' },
-  { bit: 1 << 18, name: 'Moderator' },
-  { bit: 1 << 22, name: 'Active Developer' }
+/* ===== Discord badges (full icons from Lanyard flags) ===== */
+const BADGE_DEFS = [
+  { bit: 1 << 0,  id: "staff",      title: "Discord Staff",        svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#5865F2" d="M12 2L9 8H3l5 4-2 7 6-4 6 4-2-7 5-4h-6z"/></svg>' },
+  { bit: 1 << 1,  id: "partner",    title: "Partnered Server Owner", svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#5865F2" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1 15l-5-5 1.4-1.4L11 14.2l7.6-7.6L20 8l-9 9z"/></svg>' },
+  { bit: 1 << 2,  id: "hypesquad",  title: "HypeSquad Events",     svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#F47B67" d="M12 2l2.4 7.2H22l-6 4.8 2.3 7L12 16.8 5.7 21l2.3-7-6-4.8h7.6z"/></svg>' },
+  { bit: 1 << 3,  id: "bughunter1", title: "Bug Hunter",           svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#3BA55C" d="M20 8h-2.8l1.4-1.4-1.4-1.4L14.8 7H12V4h-1v3H8.2L6.8 5.2 5.4 6.6 6.8 8H4c-1.1 0-2 .9-2 2v2h2v-1h2v6H4v-1H2v3c0 1.1.9 2 2 2h4v-2H6v-6h4v8h1v-8h4v6h-2v2h4c1.1 0 2-.9 2-2v-3h-2v1h-2v-6h2v1h2v-2c0-1.1-.9-2-2-2z"/></svg>' },
+  { bit: 1 << 6,  id: "bravery",    title: "HypeSquad Bravery",    svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#9B84EE" d="M12 2L4 5v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V5l-8-3z"/></svg>' },
+  { bit: 1 << 7,  id: "brilliance", title: "HypeSquad Brilliance", svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#F47B67" d="M12 2L4 5v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V5l-8-3z"/></svg>' },
+  { bit: 1 << 8,  id: "balance",    title: "HypeSquad Balance",    svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#45DDC0" d="M12 2L4 5v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V5l-8-3z"/></svg>' },
+  { bit: 1 << 9,  id: "early",      title: "Early Supporter",      svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#9B84EE" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' },
+  { bit: 1 << 14, id: "bughunter2", title: "Bug Hunter Level 2",   svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#C6E0A4" d="M20 8h-2.8l1.4-1.4-1.4-1.4L14.8 7H12V4h-1v3H8.2L6.8 5.2 5.4 6.6 6.8 8H4c-1.1 0-2 .9-2 2v2h2v-1h2v6H4v-1H2v3c0 1.1.9 2 2 2h4v-2H6v-6h4v8h1v-8h4v6h-2v2h4c1.1 0 2-.9 2-2v-3h-2v1h-2v-6h2v1h2v-2c0-1.1-.9-2-2-2z"/></svg>' },
+  { bit: 1 << 17, id: "botdev",     title: "Early Verified Bot Developer", svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#3BA55C" d="M8 7h2v2H8V7zm6 0h2v2h-2V7zM9 14c0 1.7 1.3 3 3 3s3-1.3 3-3h-2c0 .6-.4 1-1 1s-1-.4-1-1H9zm-5-2v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5H4zm16-3c0-2.8-2.2-5-5-5H9C6.2 4 4 6.2 4 9v1h16V9z"/></svg>' },
+  { bit: 1 << 18, id: "mod",        title: "Moderator Programs Alumni", svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#5865F2" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>' },
+  { bit: 1 << 22, id: "activedev",  title: "Active Developer",     svg: '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#23A559" d="M8.5 6L3 12l5.5 6L10 16.5 5.5 12 10 7.5 8.5 6zm7 0L14 7.5 18.5 12 14 16.5 15.5 18l5.5-6-5.5-6z"/></svg>' }
 ];
 
+const NITRO_SVG = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#FF73FA" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.79 3 4s-1.34 4-3 4-3-1.79-3-4 1.34-4 3-4zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
+
 function renderBadges(user) {
-  const box = document.getElementById('discordBadges');
+  const box = document.getElementById("discordBadges");
   if (!box || !user) return;
-  box.innerHTML = '';
+  box.innerHTML = "";
   const flags = user.public_flags || 0;
-  FLAG_BADGES.forEach(function(b) {
+
+  BADGE_DEFS.forEach(function(b) {
     if (flags & b.bit) {
-      const span = document.createElement('span');
-      span.className = 'badge-pill';
-      span.textContent = b.name;
-      box.appendChild(span);
+      const el = document.createElement("span");
+      el.className = "discord-badge";
+      el.title = b.title;
+      el.innerHTML = b.svg;
+      box.appendChild(el);
     }
   });
-  // Nitro / premium_type if present
+
+  // Nitro (premium_type: 1 Classic, 2 Nitro, 3 Basic)
   if (user.premium_type === 1 || user.premium_type === 2 || user.premium_type === 3) {
-    const span = document.createElement('span');
-    span.className = 'badge-pill';
-    span.textContent = 'Nitro';
-    box.appendChild(span);
+    const el = document.createElement("span");
+    el.className = "discord-badge";
+    el.title = user.premium_type === 2 ? "Nitro" : (user.premium_type === 1 ? "Nitro Classic" : "Nitro Basic");
+    el.innerHTML = NITRO_SVG;
+    box.appendChild(el);
   }
 }
 
 /* ===== Live Discord Status via Lanyard ===== */
+
 /*
   HOW TO ENABLE LIVE STATUS:
   1. Open Discord → Settings → Advanced → turn on Developer Mode
@@ -477,25 +484,7 @@ fetchLanyard();
 setInterval(fetchLanyard, 30000);
 
 
-/* ===== Design Theme Picker ===== */
-const themePicker = document.getElementById('themePicker');
-if (themePicker) {
-  const savedDesign = localStorage.getItem('jinxDesign') || 'midnight';
-  themePicker.value = savedDesign;
-  if (savedDesign !== 'midnight') {
-    document.body.setAttribute('data-theme', savedDesign);
-  }
-  themePicker.addEventListener('change', function() {
-    const v = themePicker.value;
-    if (v === 'midnight') {
-      document.body.removeAttribute('data-theme');
-    } else {
-      document.body.setAttribute('data-theme', v);
-    }
-    localStorage.setItem('jinxDesign', v);
-    if (typeof playClick === 'function') playClick();
-  });
-}
+
 
 
 /* ===== Smooth scroll with offset for sticky nav ===== */
@@ -510,6 +499,100 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
     window.scrollTo({ top: top, behavior: 'smooth' });
   });
 });
+
+
+/* ===== Design Theme Picker (custom UI) ===== */
+const THEMES = [
+  { id: "midnight",  name: "Midnight",      colors: ["#7c5cfc", "#f472b6", "#34d399"] },
+  { id: "minimal",   name: "Minimal Light", colors: ["#18181b", "#a1a1aa", "#16a34a"] },
+  { id: "cyber",     name: "Cyber Neon",    colors: ["#00f0ff", "#ff00aa", "#00ff9d"] },
+  { id: "pastel",    name: "Soft Pastel",   colors: ["#e8919a", "#c97b9a", "#7cb89a"] },
+  { id: "terminal",  name: "Terminal",      colors: ["#33ff66", "#2a9a4a", "#66ff99"] },
+  { id: "glass",     name: "Glass",         colors: ["#a78bfa", "#f9a8d4", "#34d399"] },
+  { id: "brutalist", name: "Brutalist",     colors: ["#ffffff", "#0f0", "#111111"] },
+  { id: "ocean",     name: "Ocean",         colors: ["#38bdf8", "#22d3ee", "#2dd4bf"] },
+  { id: "sunset",    name: "Sunset",        colors: ["#f97316", "#f43f5e", "#fbbf24"] },
+  { id: "nord",      name: "Nord",          colors: ["#88c0d0", "#b48ead", "#a3be8c"] },
+  { id: "synthwave", name: "Synthwave",     colors: ["#ff2a6d", "#05d9e8", "#d1f7ff"] },
+  { id: "ember",     name: "Ember",         colors: ["#ef4444", "#fb7185", "#fbbf24"] },
+  { id: "discord",   name: "Discord",       colors: ["#5865f2", "#eb459e", "#23a559"] },
+  { id: "mono",      name: "Monochrome",    colors: ["#ffffff", "#888888", "#333333"] },
+  { id: "forest",    name: "Forest",        colors: ["#4ade80", "#a3e635", "#22c55e"] }
+];
+
+(function initThemeUI() {
+  const ui = document.getElementById("themeUI");
+  const trigger = document.getElementById("themeTrigger");
+  const panel = document.getElementById("themePanel");
+  const grid = document.getElementById("themeGrid");
+  const label = document.getElementById("themeLabel");
+  const swatches = document.getElementById("themeSwatches");
+  if (!ui || !trigger || !panel || !grid) return;
+
+  let current = localStorage.getItem("jinxDesign") || "midnight";
+
+  function applyTheme(id) {
+    current = id;
+    if (id === "midnight") {
+      document.body.removeAttribute("data-theme");
+    } else {
+      document.body.setAttribute("data-theme", id);
+    }
+    localStorage.setItem("jinxDesign", id);
+    const t = THEMES.find(function(x) { return x.id === id; }) || THEMES[0];
+    if (label) label.textContent = t.name;
+    if (swatches) {
+      swatches.innerHTML = t.colors.map(function(c) {
+        return '<i style="background:' + c + '"></i>';
+      }).join("");
+    }
+    grid.querySelectorAll(".theme-option").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.theme === id);
+    });
+  }
+
+  THEMES.forEach(function(t) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-option" + (t.id === current ? " active" : "");
+    btn.dataset.theme = t.id;
+    btn.setAttribute("role", "option");
+    btn.innerHTML =
+      '<span class="dots">' +
+        t.colors.map(function(c) { return '<i style="background:' + c + '"></i>'; }).join("") +
+      '</span><span class="name">' + t.name + '</span>';
+    btn.addEventListener("click", function() {
+      applyTheme(t.id);
+      closePanel();
+      if (typeof playClick === "function") playClick();
+    });
+    grid.appendChild(btn);
+  });
+
+  function openPanel() {
+    panel.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+  }
+  function closePanel() {
+    panel.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  }
+
+  trigger.addEventListener("click", function(e) {
+    e.stopPropagation();
+    if (panel.hidden) openPanel(); else closePanel();
+  });
+
+  document.addEventListener("click", function(e) {
+    if (!ui.contains(e.target)) closePanel();
+  });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closePanel();
+  });
+
+  applyTheme(current);
+})();
 
 /* ===== Unlock audio on first gesture ===== */
 ['click', 'touchstart', 'keydown'].forEach(function(evt) {
