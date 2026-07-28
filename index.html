@@ -1,1041 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Jinx — Discord Staff Portfolio</title>
-<meta name="description" content="Jinx — Discord community manager and moderator. Bot commands, webhooks, DMCA handling, and community care."/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-<style>
-  :root{
-    --bg:        #0a0812;
-    --surface:   #141024;
-    --surface-2: #1b1730;
-    --border:    #2a2444;
-    --purple:    #8b5cf6;
-    --purple-lt: #c4b5fd;
-    --pink:      #f472b6;
-    --mint:      #34d399;
-    --text:      #ece9f7;
-    --muted:     #8f89ab;
-    --glow: 0 0 30px rgba(139,92,246,.35);
-  }
-  body.light{
-    --bg:        #f6f4ff;
-    --surface:   #ffffff;
-    --surface-2: #f0ecff;
-    --border:    #ddd6f5;
-    --text:      #1a1730;
-    --muted:     #6f6a8a;
-    --glow: 0 0 30px rgba(139,92,246,.18);
-  }
-  body.light .orb{ opacity:.25; }
-  body.light .grid-overlay{ opacity:.4; }
-
-  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
-  body{
-    background:var(--bg); color:var(--text);
-    font-family:'DM Mono',monospace; font-size:15px; line-height:1.7;
-    overflow-x:hidden;
-  }
-  ::selection{ background:rgba(139,92,246,.35); color:#fff; }
-
-  .grid-overlay{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background-image:
-      linear-gradient(rgba(139,92,246,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139,92,246,.05) 1px, transparent 1px);
-    background-size:56px 56px;
-    transition:opacity .4s;
-  }
-  .orb{
-    position:fixed; border-radius:50%; filter:blur(70px); z-index:0; pointer-events:none;
-    transition:opacity .4s;
-  }
-  .orb1{ width:420px; height:420px; top:-140px; left:-120px; background:rgba(139,92,246,.28); }
-  .orb2{ width:360px; height:360px; bottom:-120px; right:-100px; background:rgba(244,114,182,.18); }
-  .orb3{ width:260px; height:260px; top:45%; left:60%; background:rgba(52,211,153,.12); }
-
-  #cursor-glow{
-    position:fixed; width:260px; height:260px; border-radius:50%;
-    background:radial-gradient(circle, rgba(139,92,246,.10), transparent 70%);
-    pointer-events:none; z-index:1; transform:translate(-50%,-50%);
-    transition:opacity .3s; opacity:0;
-  }
-
-  section, nav, footer{ position:relative; z-index:2; }
-
-  /* NAV */
-  nav{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:1.3rem 6vw; border-bottom:1px solid var(--border);
-    backdrop-filter:blur(12px); background:rgba(10,8,18,.7);
-    position:sticky; top:0; z-index:100;
-  }
-  body.light nav{ background:rgba(246,244,255,.8); }
-  .nav-logo{
-    font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem; letter-spacing:-.02em;
-    background:linear-gradient(135deg, var(--purple-lt), var(--pink));
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    cursor:pointer; border:none; background-color:transparent;
-  }
-  .nav-links{ display:flex; gap:2rem; list-style:none; }
-  .nav-links a{
-    color:var(--muted); text-decoration:none; font-size:.8rem;
-    letter-spacing:.1em; text-transform:uppercase; transition:color .2s;
-  }
-  .nav-links a:hover{ color:var(--purple-lt); }
-  .nav-right{ display:flex; align-items:center; gap:.7rem; }
-  .icon-btn{
-    background:var(--surface); border:1px solid var(--border); color:var(--text);
-    border-radius:20px; padding:.4rem .8rem; font-family:'DM Mono',monospace;
-    font-size:.72rem; cursor:pointer; letter-spacing:.05em; transition:all .2s;
-    display:flex; align-items:center; gap:.4rem;
-  }
-  .icon-btn:hover{ border-color:var(--purple-lt); color:var(--purple-lt); }
-  .icon-btn.active{ border-color:var(--mint); color:var(--mint); }
-  .hamburger{ display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:.3rem; }
-  .hamburger span{ display:block; width:24px; height:2px; background:var(--text); border-radius:2px; transition:.3s; }
-  .hamburger.open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
-  .hamburger.open span:nth-child(2){ opacity:0; }
-  .hamburger.open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
-  .mobile-nav{
-    display:none; position:fixed; inset:0; top:60px; background:rgba(10,8,18,.97);
-    backdrop-filter:blur(16px); z-index:98; flex-direction:column;
-    align-items:center; justify-content:center; gap:2rem;
-  }
-  .mobile-nav.open{ display:flex; }
-  .mobile-nav a{ color:var(--text); text-decoration:none; font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:700; }
-  .mobile-nav a:hover{ color:var(--purple-lt); }
-
-  /* BANNER */
-  .avail-banner{
-    background:linear-gradient(90deg, rgba(52,211,153,.10), rgba(139,92,246,.10));
-    border-bottom:1px solid rgba(52,211,153,.25);
-    padding:.6rem 6vw; display:flex; align-items:center; justify-content:center; gap:.7rem;
-    font-size:.78rem; letter-spacing:.03em; text-align:center;
-  }
-  .avail-dot{ width:8px; height:8px; border-radius:50%; background:var(--mint); box-shadow:0 0 8px var(--mint); animation:pulse 2s infinite; flex-shrink:0; }
-  @keyframes pulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.6;transform:scale(1.3);} }
-  .avail-banner strong{ color:var(--mint); }
-
-  /* HERO */
-  #hero{ min-height:88vh; display:flex; flex-direction:column; justify-content:center; padding:8vh 6vw 6vh; }
-  .hero-layout{ display:flex; align-items:center; gap:4rem; flex-wrap:wrap; }
-  .hero-text{ flex:1; min-width:280px; }
-  .hero-tag{
-    font-size:.75rem; letter-spacing:.18em; text-transform:uppercase; color:var(--purple-lt);
-    display:flex; align-items:center; gap:.6rem; margin-bottom:1.4rem;
-    opacity:0; animation:fadeUp .6s .2s forwards;
-  }
-  .hero-tag::before{ content:''; width:28px; height:1px; background:var(--purple-lt); }
-  .last-updated{
-    display:inline-flex; align-items:center; gap:.5rem; font-size:.7rem; color:var(--muted);
-    background:var(--surface); border:1px solid var(--border); border-radius:20px;
-    padding:.3rem .9rem; margin-bottom:1.2rem;
-    opacity:0; animation:fadeUp .6s .1s forwards;
-  }
-  .last-updated span{ color:var(--purple-lt); }
-  h1{
-    font-family:'Syne',sans-serif; font-size:clamp(3rem,8vw,6.4rem); font-weight:800;
-    line-height:.97; letter-spacing:-.03em; margin-bottom:1.1rem;
-    opacity:0; animation:fadeUp .7s .35s forwards;
-  }
-  h1 .highlight{
-    display:block; background:linear-gradient(135deg, var(--purple-lt) 0%, var(--pink) 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  }
-  .hero-sub{ max-width:520px; color:var(--muted); font-size:.95rem; margin-bottom:2.2rem; opacity:0; animation:fadeUp .7s .5s forwards; }
-  .btn-row{ display:flex; gap:1rem; flex-wrap:wrap; opacity:0; animation:fadeUp .7s .65s forwards; }
-  .btn{
-    display:inline-flex; align-items:center; gap:.5rem; padding:.75rem 1.7rem; border-radius:5px;
-    font-family:'DM Mono',monospace; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase;
-    text-decoration:none; transition:all .25s; cursor:pointer; border:none;
-  }
-  .btn-primary{ background:var(--purple); color:#fff; border:1px solid var(--purple); box-shadow:0 0 20px rgba(139,92,246,.4); }
-  .btn-primary:hover{ background:var(--purple-lt); color:#0a0812; box-shadow:0 0 35px rgba(196,181,253,.55); transform:translateY(-2px); }
-  .btn-ghost{ background:transparent; color:var(--text); border:1px solid var(--border); }
-  .btn-ghost:hover{ border-color:var(--purple-lt); color:var(--purple-lt); transform:translateY(-2px); }
-
-  @keyframes fadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
-
-  /* AVATAR + CAT FAMILIAR */
-  .hero-avatar-wrap{ flex-shrink:0; opacity:0; animation:fadeUp .8s .4s forwards; position:relative; }
-  .avatar-ring{ position:relative; display:inline-block; }
-  .avatar-ring::before{ content:''; position:absolute; inset:-8px; border-radius:50%; border:1px solid rgba(139,92,246,.3); animation:ringspin 8s linear infinite; }
-  .avatar-ring::after{ content:''; position:absolute; inset:-17px; border-radius:50%; border:1px dashed rgba(196,181,253,.2); animation:ringspin 14s linear infinite reverse; }
-  @keyframes ringspin{ from{transform:rotate(0);} to{transform:rotate(360deg);} }
-  .hero-avatar{
-    width:200px; height:200px; border-radius:50%; border:3px solid var(--purple);
-    box-shadow:0 0 40px rgba(139,92,246,.5), 0 0 80px rgba(139,92,246,.2);
-    animation:float 6s ease-in-out infinite;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    background:linear-gradient(135deg, #1b1730, #0a0812);
-    font-family:'Syne',sans-serif; font-weight:800; font-size:4.2rem;
-    background-clip:padding-box;
-  }
-  .hero-avatar img{ width:100%; height:100%; object-fit:cover; }
-  .hero-avatar span{ background:linear-gradient(135deg,var(--purple-lt),var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  @keyframes float{ 0%,100%{transform:translateY(0) rotate(-1deg);} 50%{transform:translateY(-12px) rotate(1deg);} }
-  .online-badge{
-    position:absolute; bottom:14px; right:14px; width:20px; height:20px; border-radius:50%;
-    background:var(--mint); border:3px solid var(--bg); box-shadow:0 0 10px var(--mint); animation:pulse 2s infinite;
-  }
-  .familiar{
-    position:absolute; bottom:-6px; left:-26px; width:46px; height:46px; cursor:pointer;
-    filter:drop-shadow(0 0 8px rgba(139,92,246,.5)); transition:transform .2s;
-  }
-  .familiar:hover{ transform:scale(1.12) rotate(-4deg); }
-
-  /* TICKER */
-  .ticker-wrap{ overflow:hidden; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--surface); padding:.7rem 0; }
-  .ticker-track{ display:flex; width:max-content; animation:tickerscroll 32s linear infinite; }
-  .ticker-wrap:hover .ticker-track{ animation-play-state:paused; }
-  @keyframes tickerscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .ticker-item{ display:flex; align-items:center; gap:.6rem; padding:0 2.2rem; white-space:nowrap; font-size:.78rem; color:var(--muted); letter-spacing:.05em; }
-  .ticker-item .dot{ color:var(--purple-lt); }
-
-  /* SECTIONS */
-  .section{ padding:6.5rem 6vw; border-top:1px solid var(--border); }
-  .section-label{ font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--purple-lt); margin-bottom:.6rem; display:flex; align-items:center; gap:.6rem; }
-  .section-label::before{ content:''; width:22px; height:1px; background:var(--purple-lt); }
-  .section-title{ font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.7rem,4vw,2.7rem); letter-spacing:-.02em; margin-bottom:2.6rem; }
-
-  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease; }
-  .reveal.in{ opacity:1; transform:translateY(0); }
-
-  /* ABOUT */
-  .about-grid{ display:grid; grid-template-columns:1.15fr .85fr; gap:3.5rem; align-items:start; }
-  @media (max-width:800px){ .about-grid, .contact-wrap{ grid-template-columns:1fr; } }
-  .about-body{ color:var(--muted); line-height:1.9; }
-  .about-body p+p{ margin-top:1rem; }
-  .skills-list{ display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.6rem; }
-  .skill-tag{
-    background:rgba(139,92,246,.14); border:1px solid rgba(139,92,246,.35); color:var(--purple-lt);
-    font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:.3rem .85rem; border-radius:3px;
-  }
-  .about-aside{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.8rem; }
-  .aside-title{ font-family:'Syne',sans-serif; font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:1.1rem; }
-  .info-row{ display:flex; justify-content:space-between; gap:1rem; padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.82rem; }
-  .info-row:last-child{ border-bottom:none; }
-  .info-key{ color:var(--muted); }
-  .info-val{ color:var(--purple-lt); text-align:right; }
-
-  /* EXPERIENCE CARD */
-  .cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.4rem; }
-  .card{
-    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.9rem;
-    transition:border-color .25s, box-shadow .25s, transform .25s; position:relative; overflow:hidden;
-  }
-  .card::before{ content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(139,92,246,.07), transparent 60%); opacity:0; transition:opacity .3s; }
-  .card:hover{ border-color:var(--purple); box-shadow:var(--glow); transform:translateY(-3px); }
-  .card:hover::before{ opacity:1; }
-  .card-icon{ width:48px; height:48px; border-radius:11px; margin-bottom:1.1rem; display:flex; align-items:center; justify-content:center; font-size:1.3rem; background:rgba(88,101,242,.18); border:1px solid rgba(88,101,242,.4); }
-  .card-name{ font-family:'Syne',sans-serif; font-weight:700; font-size:1.05rem; margin-bottom:.3rem; }
-  .card-meta{ font-size:.78rem; color:var(--muted); margin-bottom:1rem; }
-  .card-desc{ font-size:.82rem; color:var(--muted); line-height:1.8; }
-  .card-badge{ display:inline-block; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; padding:.25rem .7rem; border-radius:3px; background:rgba(139,92,246,.2); color:var(--purple-lt); border:1px solid rgba(139,92,246,.4); margin-bottom:1rem; }
-  .card-badge.badge-manager{ background:rgba(52,211,153,.16); color:var(--mint); border-color:rgba(52,211,153,.4); }
-  .card-badge.badge-tester{ background:rgba(245,158,11,.16); color:#f59e0b; border-color:rgba(245,158,11,.4); }
-  .card-meta-row{ display:flex; align-items:center; justify-content:space-between; margin-top:1.3rem; flex-wrap:wrap; gap:.6rem; }
-  .card-link{ font-size:.72rem; color:var(--muted); text-decoration:none; letter-spacing:.05em; transition:color .2s; }
-  .card-link:hover{ color:var(--purple-lt); }
-  .card-link.disabled{ color:var(--muted); opacity:.55; pointer-events:none; }
-  .card-updated{ font-size:.68rem; color:var(--muted); margin-top:.7rem; opacity:.7; }
-  .responsibility-list{ list-style:none; margin-top:1rem; display:flex; flex-direction:column; gap:.55rem; }
-  .responsibility-list li{ font-size:.82rem; color:var(--muted); display:flex; gap:.6rem; align-items:flex-start; }
-  .responsibility-list li::before{ content:'▸'; color:var(--purple-lt); flex-shrink:0; }
-  .aside-note{ margin-top:1.4rem; font-size:.8rem; color:var(--muted); line-height:1.8; padding:1rem 1.2rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; }
-
-  /* WHY GRID */
-  .why-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.2rem; }
-  .why-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.6rem; transition:border-color .25s,transform .25s,box-shadow .25s; }
-  .why-card:hover{ border-color:var(--purple); transform:translateY(-3px); box-shadow:var(--glow); }
-  .why-icon{ font-size:1.7rem; margin-bottom:.8rem; }
-  .why-title{ font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; margin-bottom:.5rem; }
-  .why-desc{ font-size:.82rem; color:var(--muted); line-height:1.8; }
-
-  /* CAT CORNER */
-  #cat-corner{ background:var(--surface-2); }
-  .cat-layout{ display:grid; grid-template-columns:.9fr 1.1fr; gap:3.5rem; align-items:center; }
-  @media (max-width:800px){ .cat-layout{ grid-template-columns:1fr; } }
-  .cat-stage{
-    background:var(--surface); border:1px solid var(--border); border-radius:14px;
-    padding:1.5rem; display:flex; flex-direction:column; align-items:center; gap:1rem;
-    box-shadow:0 0 0 rgba(0,0,0,0);
-  }
-  #cat-canvas{ width:100%; max-width:340px; height:320px; cursor:pointer; touch-action:none; }
-  .cat-hint{ font-size:.72rem; color:var(--muted); letter-spacing:.04em; text-align:center; }
-  .cat-controls{ display:flex; flex-direction:column; gap:1.2rem; }
-  .control-row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.9rem 1.2rem; }
-  .control-label{ font-size:.8rem; }
-  .control-label small{ display:block; color:var(--muted); font-size:.68rem; margin-top:.15rem; }
-  .toggle-switch{ position:relative; width:42px; height:22px; border-radius:20px; background:var(--border); border:none; cursor:pointer; flex-shrink:0; transition:background .25s; }
-  .toggle-switch::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--muted); transition:transform .25s, background .25s; }
-  .toggle-switch.on{ background:rgba(52,211,153,.3); }
-  .toggle-switch.on::after{ transform:translateX(20px); background:var(--mint); }
-  input[type=range]{ width:120px; accent-color:var(--purple-lt); }
-  .cat-fact{
-    font-size:.85rem; color:var(--purple-lt); min-height:2.6em; line-height:1.6;
-    border-left:2px solid var(--purple); padding-left:1rem;
-  }
-  .purr-meter{ display:flex; gap:4px; align-items:flex-end; height:18px; }
-  .purr-bar{ width:5px; background:var(--purple); border-radius:2px; height:4px; transition:height .1s; }
-
-  /* CONTACT */
-  .contact-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:3.5rem; align-items:start; }
-  .contact-blurb{ color:var(--muted); line-height:1.9; }
-  .socials{ display:flex; flex-direction:column; gap:.9rem; margin-top:1.8rem; }
-  .social-link{
-    display:flex; align-items:center; gap:1rem; background:var(--surface); border:1px solid var(--border);
-    border-radius:8px; padding:1rem 1.3rem; text-decoration:none; color:var(--text);
-    transition:border-color .2s, box-shadow .2s; font-size:.85rem;
-  }
-  .social-link:hover{ border-color:var(--purple-lt); box-shadow:var(--glow); }
-  .social-icon{ font-size:1.3rem; }
-  .social-name{ font-family:'Syne',sans-serif; font-weight:700; font-size:.9rem; }
-  .social-handle{ font-size:.75rem; color:var(--muted); display:flex; align-items:center; gap:.4rem; }
-  .copy-btn{
-    background:none; border:1px solid var(--border); color:var(--muted); border-radius:4px;
-    padding:.15rem .5rem; font-size:.66rem; cursor:pointer; letter-spacing:.05em;
-    font-family:'DM Mono',monospace; transition:all .2s;
-  }
-  .copy-btn:hover{ border-color:var(--purple-lt); color:var(--purple-lt); }
-  .copy-btn.copied{ border-color:var(--mint); color:var(--mint); }
-  .contact-note{ margin-top:1.4rem; padding:1rem 1.3rem; background:rgba(139,92,246,.08); border:1px solid rgba(139,92,246,.25); border-radius:8px; font-size:.82rem; color:var(--muted); line-height:1.8; }
-  .contact-note strong{ color:var(--purple-lt); }
-  .contact-visual{
-    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:2rem;
-    display:flex; flex-direction:column; gap:1rem; align-items:center; justify-content:center; min-height:260px;
-  }
-  .status-pill{ display:inline-flex; align-items:center; gap:.5rem; background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:.4rem 1rem; font-size:.75rem; }
-  .status-pill .dot{ width:8px; height:8px; border-radius:50%; background:var(--mint); box-shadow:0 0 6px var(--mint); }
-
-  /* FOOTER */
-  footer{ padding:2.5rem 6vw; border-top:1px solid var(--border); }
-  .footer-inner{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; font-size:.78rem; color:var(--muted); }
-  .footer-back{
-    background:var(--surface); border:1px solid var(--border); color:var(--muted); border-radius:4px;
-    padding:.4rem 1rem; font-family:'DM Mono',monospace; font-size:.75rem; cursor:pointer;
-    text-decoration:none; display:inline-flex; align-items:center; gap:.4rem; transition:all .2s;
-  }
-  .footer-back:hover{ border-color:var(--purple-lt); color:var(--purple-lt); transform:translateY(-2px); }
-
-  @media (max-width:760px){
-    .nav-links{ display:none; }
-    .hamburger{ display:flex; }
-    #hero{ min-height:auto; padding-top:6vh; }
-    .hero-layout{ flex-direction:column-reverse; text-align:left; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jinx - Discord Staff Portfolio</title>
+  <meta name="description" content="Jinx - Discord community manager and moderator. Bot commands, webhooks, DMCA handling, and community care." />
+  <meta name="theme-color" content="#0b0a14" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="cursor-glow" aria-hidden="true"></div>
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
+  <div class="grid-bg" aria-hidden="true"></div>
 
-<div class="grid-overlay"></div>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
-<div id="cursor-glow"></div>
+  <nav class="nav" id="nav">
+    <a href="#hero" class="logo">Jinx<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#offer">Services</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#why">Why Me</a></li>
+      <li><a href="#cat">Cat Corner</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="sound-toggle" id="soundToggle" aria-label="Toggle sounds" title="Toggle sounds">
+        <svg class="icon-sound-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <svg class="icon-sound-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </button>
+      <select id="themePicker" class="theme-picker" title="Switch design">
+        <option value="midnight">Midnight</option>
+        <option value="minimal">Minimal Light</option>
+        <option value="cyber">Cyber Neon</option>
+        <option value="pastel">Soft Pastel</option>
+        <option value="terminal">Terminal</option>
+        <option value="glass">Glass</option>
+        <option value="brutalist">Brutalist</option>
+      </select>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="#contact" class="btn btn-sm btn-primary">Hire Me</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
 
-<div class="avail-banner">
-  <div class="avail-dot"></div>
-  <p><strong>Open to new staff roles</strong> — looking for Discord servers to help moderate and manage. DM me!</p>
-</div>
-
-<nav>
-  <button class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">Jinx</button>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#why">Why Me</a></li>
-    <li><a href="#cat-corner">Cat Corner</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <div class="nav-right">
-    <button class="icon-btn" id="ambient-btn" onclick="toggleAmbient()">🔈 Sound</button>
-    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
-    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about">About</a>
+    <a href="#offer">Services</a>
+    <a href="#experience">Experience</a>
+    <a href="#why">Why Me</a>
+    <a href="#cat">Cat Corner</a>
+    <a href="#contact">Contact</a>
   </div>
-</nav>
 
-<div class="mobile-nav" id="mobile-nav">
-  <a href="#about" onclick="closeMobileNav()">About</a>
-  <a href="#experience" onclick="closeMobileNav()">Experience</a>
-  <a href="#why" onclick="closeMobileNav()">Why Me</a>
-  <a href="#cat-corner" onclick="closeMobileNav()">Cat Corner</a>
-  <a href="#contact" onclick="closeMobileNav()">Contact</a>
-</div>
+  <div class="banner"><span class="views" id="viewCount" title="Unique views">—</span>
+    <span class="dot"></span>
+    <span><strong>Open to new roles</strong> - Discord servers &amp; Roblox games to moderate</span>
+  </div>
 
-<section id="hero">
-  <div class="hero-layout">
-    <div class="hero-text">
-      <div class="last-updated">Last updated <span id="last-updated-date">—</span></div>
-      <p class="hero-tag">Moderation &amp; Community Portfolio</p>
-      <h1>Hey, I'm<span class="highlight">Jinx.</span></h1>
-      <p class="hero-sub">
-        Discord community manager and moderator. I build bot commands, wire up webhooks,
-        handle DMCA takedowns, and keep servers safe, fair and running smoothly.
+  <header id="hero" class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        Discord Staff Portfolio · Updated Jul 2026
+      </div>
+      <h1>Hey, I'm <span class="gradient">Jinx</span></h1>
+      <p class="hero-lead">
+        Discord community manager and Roblox moderator. I build bot commands, use in-game commands,
+        handle webhooks and DMCA takedowns, and keep communities safe, fair, and running smoothly.
+        No training needed — I already know the tools.
       </p>
-      <div class="btn-row">
-        <a href="#experience" class="btn btn-primary" onmouseenter="Sound.hover()">View Experience</a>
-        <a href="#contact" class="btn btn-ghost" onmouseenter="Sound.hover()">Get In Touch</a>
-      </div>
-    </div>
-    <div class="hero-avatar-wrap">
-      <div class="avatar-ring">
-        <div class="hero-avatar"><img src="https://static2.klipy.com/ii/39f2394ae36df6e199be9eb7c9fa1012/48/53/6uWKZpAD.gif" alt="Jinx avatar" loading="lazy"/></div>
-        <div class="online-badge"></div>
-      </div>
-      <svg class="familiar" id="familiar-svg" viewBox="0 0 64 64" onclick="Cat.petFromHero()">
-        <ellipse cx="32" cy="40" rx="20" ry="16" fill="#1b1730" stroke="#8b5cf6" stroke-width="2"/>
-        <path d="M16 30 L10 12 L26 24 Z" fill="#1b1730" stroke="#8b5cf6" stroke-width="2"/>
-        <path d="M48 30 L54 12 L38 24 Z" fill="#1b1730" stroke="#8b5cf6" stroke-width="2"/>
-        <circle cx="24" cy="36" r="3" fill="#c4b5fd"/>
-        <circle cx="40" cy="36" r="3" fill="#c4b5fd"/>
-        <path d="M30 44 Q32 47 34 44" stroke="#f472b6" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<div class="ticker-wrap">
-  <div class="ticker-track" id="ticker-track"></div>
-</div>
-
-<section id="about" class="section">
-  <p class="section-label reveal">About</p>
-  <h2 class="section-title reveal">Who I Am</h2>
-  <div class="about-grid">
-    <div class="about-body reveal">
-      <p>I'm Jinx — a Discord community manager who genuinely enjoys the job. I've built bot commands
-      from scratch, configured webhooks that keep channels talking to each other, and filed DMCA
-      takedowns to protect the communities I work with. Staying calm under pressure and clear in
-      writing is most of the job; the rest is just showing up consistently.</p>
-      <p>Off the clock I'm on PC running a RTX 5060 and Ryzen 7 5800X, deep in Roblox and Minecraft,
-      or working my way through the entire God of War series — the old Greek-era trilogy through
-      2018's reboot and Ragnarok. I'm also a lifelong cat person — there's a whole corner of this
-      site dedicated to that if you scroll far enough.</p>
-      <div class="skills-list">
-        <span class="skill-tag">Discord Bot Commands</span>
-        <span class="skill-tag">Webhook Configuration</span>
-        <span class="skill-tag">DMCA Takedowns</span>
-        <span class="skill-tag">Community Moderation</span>
-        <span class="skill-tag">De-escalation</span>
-        <span class="skill-tag">Server Setup</span>
-      </div>
-    </div>
-    <div class="about-aside reveal">
-      <div class="aside-title">Quick Info</div>
-      <div class="info-row"><span class="info-key">Role</span><span class="info-val">Community Manager / Moderator</span></div>
-      <div class="info-row"><span class="info-key">Platform</span><span class="info-val">Discord</span></div>
-      <div class="info-row"><span class="info-key">Rig</span><span class="info-val">RTX 5060 · Ryzen 7 5800X</span></div>
-      <div class="info-row"><span class="info-key">Playing</span><span class="info-val">Roblox · Minecraft</span></div>
-      <div class="info-row"><span class="info-key">God of War</span><span class="info-val">I · II · III · 2018 · Ragnarok</span></div>
-      <div class="info-row"><span class="info-key">Status</span><span class="info-val">Open to new servers</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="experience" class="section">
-  <p class="section-label reveal">Experience</p>
-  <h2 class="section-title reveal">Where I've Staffed</h2>
-  <div class="cards">
-    <div class="card reveal">
-      <div class="card-badge badge-manager">Manager</div>
-      <div class="card-icon">💬</div>
-      <div class="card-name">QuickSpeed</div>
-      <div class="card-meta">1,613 members</div>
-      <div class="card-desc">A growing Discord community. As Manager I oversee moderation operations,
-      manage the team, handle escalations, and ensure the server runs smoothly for all members.</div>
-      <ul class="responsibility-list">
-        <li>Building custom bot commands for the server</li>
-        <li>Configuring and maintaining webhooks</li>
-        <li>Filing DMCA takedowns to protect community content</li>
-        <li>General moderation and escalation handling</li>
-      </ul>
-      <div class="card-meta-row"><a href="#" class="card-link">Join Server</a></div>
-      <div class="card-updated">Updated 31/03/2026</div>
-    </div>
-    <div class="card reveal">
-      <div class="card-badge">Moderator</div>
-      <div class="card-icon">🛠️</div>
-      <div class="card-name">Project Uncopylocked Production</div>
-      <div class="card-meta">4,967 members</div>
-      <div class="card-desc">A Roblox development community focused on uncopylocked projects. As
-      Moderator I enforce community guidelines, handle reports, and keep the space productive and
-      respectful.</div>
-      <div class="card-meta-row"><span class="card-link disabled">Invite Unavailable</span></div>
-      <div class="card-updated">Updated 31/03/2026</div>
-    </div>
-    <div class="card reveal">
-      <div class="card-badge badge-tester">Tester</div>
-      <div class="card-icon">🐞</div>
-      <div class="card-name">Fix it Up</div>
-      <div class="card-meta">202,222 members</div>
-      <div class="card-desc">A large active Discord community. As Tester I help identify bugs, test
-      new features, and provide detailed feedback to help improve the server and its systems.</div>
-      <div class="card-meta-row"><a href="#" class="card-link">Join Server</a></div>
-      <div class="card-updated">Updated 31/03/2026</div>
-    </div>
-  </div>
-</section>
-
-<section id="why" class="section">
-  <p class="section-label reveal">Why Me</p>
-  <h2 class="section-title reveal">Why Hire Me</h2>
-  <div class="why-grid">
-    <div class="why-card reveal">
-      <div class="why-icon">🛠️</div>
-      <div class="why-title">Builds, Not Just Moderates</div>
-      <div class="why-desc">I don't just enforce rules — I build the bot commands and webhook automations that make a server easier to run.</div>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-icon">⚖️</div>
-      <div class="why-title">Copyright &amp; DMCA Handling</div>
-      <div class="why-desc">Real experience filing DMCA takedowns to protect community content, so you don't have to figure it out alone.</div>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-icon">💬</div>
-      <div class="why-title">Great Communicator</div>
-      <div class="why-desc">Clear with users and staff alike. Whether it's de-escalating a situation or writing an announcement, the message lands.</div>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-icon">🌙</div>
-      <div class="why-title">Consistent &amp; Reliable</div>
-      <div class="why-desc">Staff work only matters if it's steady. I show up, I follow through, and I don't disappear mid-project.</div>
-    </div>
-  </div>
-</section>
-
-<section id="cat-corner" class="section">
-  <p class="section-label reveal">Bonus</p>
-  <h2 class="section-title reveal">Cat Corner 🐾</h2>
-  <div class="cat-layout">
-    <div class="cat-stage reveal">
-      <canvas id="cat-canvas" width="340" height="320" aria-label="Interactive cat mascot, click or tap to pet"></canvas>
-      <div class="purr-meter" id="purr-meter"></div>
-      <p class="cat-hint">Click / tap the cat to pet it</p>
-    </div>
-    <div class="cat-controls reveal">
-      <div class="cat-fact" id="cat-fact">Loading a cat fact…</div>
-      <div class="control-row">
-        <div class="control-label">Ambient purring<small>Fills the whole site with a soft background hum</small></div>
-        <button class="toggle-switch" id="ambient-toggle" onclick="toggleAmbient()" aria-label="Toggle ambient sound"></button>
-      </div>
-      <div class="control-row">
-        <div class="control-label">Purr volume<small>Adjusts pet and ambient sound levels</small></div>
-        <input type="range" id="volume-slider" min="0" max="100" value="55" oninput="Sound.setVolume(this.value)"/>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="contact" class="section">
-  <p class="section-label reveal">Contact</p>
-  <h2 class="section-title reveal">Get In Touch</h2>
-  <div class="contact-wrap">
-    <div>
-      <p class="contact-blurb reveal">Want me to moderate or manage your server? Or just want to say hi?
-      Discord is the best way to reach me.</p>
-      <div class="socials reveal">
-        <a href="https://discord.com/users/matei_royale" target="_blank" class="social-link" onmouseenter="Sound.hover()">
-          <span class="social-icon">💬</span>
-          <div>
-            <div class="social-name">Discord</div>
-            <div class="social-handle">matei_royale <button class="copy-btn" onclick="copyDiscord(event, this)">copy</button></div>
-          </div>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          DM me on Discord
         </a>
+        <a href="#experience" class="btn btn-ghost">See my work</a>
       </div>
-      <div class="contact-note reveal"><strong>Prefer to just DM?</strong> Find me on Discord at
-      <strong>matei_royale</strong> — I usually reply within a day.</div>
+      <div class="hero-stats">
+        <div class="stat">
+          <strong>3</strong>
+          <span>Servers Staffed</span>
+        </div>
+        <div class="stat">
+          <strong>208k+</strong>
+          <span>Members Served</span>
+        </div>
+        <div class="stat">
+          <strong>Open</strong>
+          <span>to new roles</span>
+        </div>
+      </div>
     </div>
-    <div class="contact-visual reveal">
-      <div class="status-pill"><span class="dot"></span> Currently online</div>
-      <p style="font-size:.85rem;color:var(--muted);text-align:center;">Fastest way to reach me is a direct Discord message.</p>
+    <div class="hero-visual">
+      <div class="avatar-card">
+        <div class="avatar">
+          <img src="avatar.png" alt="Jinx profile picture" />
+          <div class="status-dot" id="statusDot" data-status="online" title="Online"></div>
+        </div>
+        <div class="avatar-info">
+          <div class="name">Jinx</div>
+          <div class="role">Community Manager</div>
+          <div class="handle">@matei_royale</div>
+          <div class="badges" id="discordBadges"></div>
+          <div class="presence" id="presenceText">
+            <span class="presence-status" id="presenceStatus">Online</span>
+            <span class="presence-game" id="presenceGame"></span>
+          </div>
+        </div>
+      </div>
     </div>
+  </header>
+
+  <section id="about" class="section">
+    <div class="section-header">
+      <span class="label">Who I Am</span>
+      <h2>About Jinx</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I'm Jinx - a Discord community manager and Roblox moderator who genuinely enjoys the job.
+          I've built bot commands from scratch, configured webhooks, filed DMCA takedowns,
+          and I know how to use in-game commands on Roblox without needing any training.
+        </p>
+        <p>
+          Staying calm under pressure and clear in writing is most of the job;
+          the rest is just showing up consistently. I'm open to both Discord servers and Roblox games.
+        </p>
+        <p>
+          I'm also a lifelong cat person - there's a small Cat Corner further down if you want a break from the serious stuff.
+        </p>
+        <div class="skills">
+          <span>Discord Bot Commands</span>
+          <span>Roblox In-Game Commands</span>
+          <span>Webhook Configuration</span>
+          <span>DMCA Takedowns</span>
+          <span>Community Moderation</span>
+          <span>De-escalation</span>
+          <span>Server Setup</span>
+          <span>No Training Needed</span>
+        </div>
+      </div>
+      <aside class="about-card">
+        <h3>Quick Info</h3>
+        <ul>
+          <li><span>Role</span><strong>Community Manager / Moderator</strong></li>
+          <li><span>Platforms</span><strong>Discord + Roblox</strong></li>
+          <li><span>Roblox</span><strong>In-game commands ready</strong></li>
+          <li><span>Status</span><strong class="mint">Open to servers &amp; games</strong></li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  
+  <section id="offer" class="section">
+    <div class="section-header">
+      <span class="label">Services</span>
+      <h2>What I Can Do For You</h2>
+    </div>
+    <div class="offer-grid">
+      <div class="offer-card">
+        <div class="offer-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Bot &amp; Command Setup</h3>
+        <p>Custom Discord bot commands and Roblox in-game commands — ready to use, no training needed.</p>
+      </div>
+      <div class="offer-card">
+        <div class="offer-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Moderation &amp; Safety</h3>
+        <p>Day-to-day moderation, escalations, de-escalation, and keeping the space fair and productive.</p>
+      </div>
+      <div class="offer-card">
+        <div class="offer-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>DMCA &amp; Copyright</h3>
+        <p>Filing and handling DMCA takedowns so your community content stays protected.</p>
+      </div>
+      <div class="offer-card">
+        <div class="offer-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Team &amp; Systems</h3>
+        <p>Webhook setup, server structure, staff coordination, and systems that make moderation easier.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="section">
+    <div class="section-header">
+      <span class="label">Track Record</span>
+      <h2>Where I've Staffed</h2>
+    </div>
+    <div class="exp-grid">
+      <article class="exp-card">
+        <div class="exp-top">
+          <div class="exp-icon manager">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <span class="badge manager">Manager</span>
+        </div>
+        <h3>QuickSpeed</h3>
+        <p class="members">1,613 members</p>
+        <p class="desc">
+          A growing Discord community. As Manager I oversee moderation operations,
+          manage the team, handle escalations, and ensure the server runs smoothly for all members.
+        </p>
+        <ul class="duties">
+          <li>Building custom bot commands for the server</li>
+          <li>Configuring and maintaining webhooks</li>
+          <li>Filing DMCA takedowns to protect community content</li>
+          <li>General moderation and escalation handling</li>
+        </ul>
+        <div class="exp-footer">
+          <span class="updated">Updated Mar 2026</span>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <div class="exp-top">
+          <div class="exp-icon mod">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <span class="badge mod">Moderator</span>
+        </div>
+        <h3>Project Uncopylocked Production</h3>
+        <p class="members">4,967 members</p>
+        <p class="desc">
+          A Roblox development community focused on uncopylocked projects.
+          As Moderator I enforce community guidelines, handle reports, and keep the space productive and respectful.
+        </p>
+        <ul class="duties">
+          <li>Enforcing community guidelines</li>
+          <li>Handling reports and escalations</li>
+          <li>Keeping the space productive</li>
+        </ul>
+        <div class="exp-footer">
+          <span class="updated">Updated Mar 2026 · Invite unavailable</span>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <div class="exp-top">
+          <div class="exp-icon tester">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="badge tester">Tester</span>
+        </div>
+        <h3>Fix it Up</h3>
+        <p class="members">202,222 members</p>
+        <p class="desc">
+          A large active Discord community. As Tester I help identify bugs,
+          test new features, and provide detailed feedback to help improve the server and its systems.
+        </p>
+        <ul class="duties">
+          <li>Identifying bugs and edge cases</li>
+          <li>Testing new features thoroughly</li>
+          <li>Providing detailed, actionable feedback</li>
+        </ul>
+        <div class="exp-footer">
+          <span class="updated">Updated Mar 2026</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="why" class="section">
+    <div class="section-header">
+      <span class="label">Value</span>
+      <h2>Why Hire Me</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <h3>Builds, Not Just Moderates</h3>
+        <p>I don't just enforce rules - I build the bot commands and webhook automations that make a server easier to run.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h3>Copyright and DMCA Handling</h3>
+        <p>Real experience filing DMCA takedowns to protect community content, so you don't have to figure it out alone.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Great Communicator</h3>
+        <p>Clear with users and staff alike. Whether it's de-escalating a situation or writing an announcement, the message lands.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Consistent and Reliable</h3>
+        <p>Staff work only matters if it's steady. I show up, I follow through, and I don't disappear mid-project.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cat" class="section cat-section">
+    <div class="section-header">
+      <span class="label">Bonus</span>
+      <h2>Cat Corner</h2>
+    </div>
+    <div class="cat-box">
+      <div class="cat-visual" id="catVisual">
+        <div class="cat-face" id="catFace">
+          <div class="ear left"></div>
+          <div class="ear right"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="nose"></div>
+          <div class="mouth"></div>
+          <div class="whisker w1"></div>
+          <div class="whisker w2"></div>
+          <div class="whisker w3"></div>
+          <div class="whisker w4"></div>
+        </div>
+        <p class="pet-hint">Click / tap the cat to pet it</p>
+        <div class="pet-count" id="petCount">Pets: 0</div>
+      </div>
+      <div class="cat-info">
+        <div class="cat-fact-box">
+          <h4>Random Cat Fact</h4>
+          <p id="catFact">Loading a cat fact...</p>
+          <button class="btn btn-ghost btn-sm" id="newFact">New fact</button>
+        </div>
+        <div class="cat-note">
+          <p>I'm a lifelong cat person. This little corner is just for fun - and proof that even staff portfolios can have personality.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section contact-section">
+    <div class="section-header">
+      <span class="label">Let's Talk</span>
+      <h2>Get In Touch</h2>
+    </div>
+    <div class="contact-card">
+      <p class="contact-lead">
+        Want me to moderate or manage your Discord server or Roblox game?<br />
+        Discord is the best (and fastest) way to reach me.
+      </p>
+      <div class="discord-box">
+        <div class="discord-handle">
+          <span class="label-sm">Discord</span>
+          <strong id="discordHandle">matei_royale</strong>
+        </div>
+        <button class="btn btn-primary" id="copyDiscord">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy username
+        </button>
+      </div>
+      <p class="reply-note">I usually reply within a day · Check my status above</p>
+    </div>
+  </section>
+
+  <div class="hire-bar" id="hireBar">
+    <span>Open to staff roles</span>
+    <a href="#contact" class="btn btn-sm btn-primary">Hire Me</a>
   </div>
-</section>
 
-<footer>
-  <div class="footer-inner">
-    <span>© <span id="footer-year"></span> Jinx. Built for community work.</span>
-    <a href="#hero" class="footer-back">↑ Back to top</a>
-  </div>
-</footer>
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© 2026 Jinx · Discord Staff Portfolio</span>
+      <span class="footer-links">Built with care · Open to Discord &amp; Roblox</span>
+    </div>
+  </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-
-  /* ---------- date ---------- */
-  var today = new Date();
-  var dateStr = today.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-  document.getElementById('last-updated-date').textContent = dateStr;
-  document.getElementById('footer-year').textContent = today.getFullYear();
-
-  /* ---------- theme toggle ---------- */
-  window.toggleTheme = function(){
-    var isLight = document.body.classList.toggle('light');
-    document.getElementById('theme-btn').innerHTML = isLight ? '☀️ Light' : '🌙 Dark';
-    Sound.click();
-  };
-
-  /* ---------- mobile nav ---------- */
-  window.toggleMobileNav = function(){
-    document.getElementById('mobile-nav').classList.toggle('open');
-    document.getElementById('hamburger').classList.toggle('open');
-  };
-  window.closeMobileNav = function(){
-    document.getElementById('mobile-nav').classList.remove('open');
-    document.getElementById('hamburger').classList.remove('open');
-  };
-  document.addEventListener('click', function(e){
-    var nav = document.getElementById('mobile-nav');
-    var burger = document.getElementById('hamburger');
-    if(nav.classList.contains('open') && !nav.contains(e.target) && e.target !== burger && !burger.contains(e.target)){
-      nav.classList.remove('open'); burger.classList.remove('open');
-    }
-  });
-
-  /* ---------- cursor glow ---------- */
-  var glow = document.getElementById('cursor-glow');
-  window.addEventListener('mousemove', function(e){
-    glow.style.opacity = 1;
-    glow.style.left = e.clientX + 'px';
-    glow.style.top = e.clientY + 'px';
-  });
-  window.addEventListener('mouseleave', function(){ glow.style.opacity = 0; });
-
-  /* ---------- reveal on scroll ---------- */
-  var revealEls = document.querySelectorAll('.reveal');
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
-    });
-  }, { threshold:.15 });
-  revealEls.forEach(function(el){ io.observe(el); });
-
-  /* ---------- ticker ---------- */
-  var tickerWords = ['Discord Moderation','Bot Commands','Webhook Config','DMCA Takedowns','Community Management',
-    'Roblox Studio','Minecraft','God of War I–III','God of War Ragnarok','Cat Person','De-escalation','Server Setup'];
-  var track = document.getElementById('ticker-track');
-  var html = '';
-  for(var r=0; r<2; r++){
-    tickerWords.forEach(function(w){
-      html += '<div class="ticker-item"><span class="dot">◆</span>' + w + '</div>';
-    });
-  }
-  track.innerHTML = html;
-
-  /* ---------- copy discord ---------- */
-  window.copyDiscord = function(ev, btn){
-    ev.preventDefault(); ev.stopPropagation();
-    navigator.clipboard.writeText('matei_royale').then(function(){
-      btn.textContent = 'copied!'; btn.classList.add('copied');
-      Sound.click();
-      setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1600);
-    });
-  };
-
-  /* ---------- cat facts ---------- */
-  var facts = [
-    "Cats spend about 70% of their lives asleep.",
-    "A group of cats is called a clowder.",
-    "Cats can rotate their ears 180 degrees.",
-    "A cat's purr can operate at a frequency that promotes healing.",
-    "Cats have a third eyelid called a haw.",
-    "Most cats have no eyelashes.",
-    "A cat's nose print is unique, just like a human fingerprint."
-  ];
-  var factEl = document.getElementById('cat-fact');
-  var fi = 0;
-  function rotateFact(){ factEl.textContent = facts[fi % facts.length]; fi++; }
-  rotateFact();
-  setInterval(rotateFact, 5000);
-
-  /* ---------- nav hover sounds ---------- */
-  document.querySelectorAll('.nav-links a, .mobile-nav a, .icon-btn').forEach(function(el){
-    el.addEventListener('mouseenter', function(){ Sound.hover(); });
-  });
-
-  /* ---------- cat canvas + petting ---------- */
-  Cat.init();
-
-}); // DOMContentLoaded
-
-/* ================= SOUND ENGINE =================
-   Reworked to stay pleasant under rapid/repeated interaction:
-   - hover/click are throttled (can't be spammed faster than a set interval)
-   - a hard cap on simultaneous transient voices stops pile-up
-   - the purr reuses ONE persistent oscillator chain instead of spawning a
-     new one per click, so mashing the cat never stacks dissonant tones
-   - everything routes through a limiter so nothing can clip or turn harsh
-*/
-var Sound = (function(){
-  var ctx = null;
-  var master = null;
-  var limiter = null;
-  var volume = 0.4;
-  var ambientNodes = null;
-
-  var lastHover = 0, lastClick = 0;
-  var HOVER_COOLDOWN = 260;   // ms between hover blips
-  var CLICK_COOLDOWN = 300;   // ms between click blips
-  var activeVoices = 0, MAX_VOICES = 3;
-
-  var purrChain = null; // persistent, lazily created, reused for every pet
-
-  function getCtx(){
-    if(!ctx){
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -26; limiter.knee.value = 18;
-      limiter.ratio.value = 8; limiter.attack.value = 0.006; limiter.release.value = 0.2;
-      master = ctx.createGain();
-      master.gain.value = volume;
-      master.connect(limiter); limiter.connect(ctx.destination);
-    }
-    if(ctx.state === 'suspended') ctx.resume();
-    return ctx;
-  }
-
-  // short one-shot blip, voice-limited and pitch-varied so repeats feel organic
-  function blip(freq, dur, type, peak){
-    if(activeVoices >= MAX_VOICES) return;
-    activeVoices++;
-    var c = getCtx();
-    var osc = c.createOscillator();
-    var gain = c.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.value = freq;
-    osc.detune.value = (Math.random() * 12 - 6);
-    var t0 = c.currentTime;
-    gain.gain.setValueAtTime(0.0001, t0);
-    gain.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0003), t0 + 0.015);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(gain).connect(master);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.05);
-    osc.onended = function(){ activeVoices = Math.max(0, activeVoices - 1); };
-  }
-
-  // one persistent low oscillator + tremolo LFO, gain ramped per pet — never duplicated
-  function ensurePurrChain(){
-    if(purrChain) return purrChain;
-    var c = getCtx();
-    var osc = c.createOscillator();
-    var lfo = c.createOscillator();
-    var lfoGain = c.createGain();
-    var gain = c.createGain();
-    osc.type = 'sine'; osc.frequency.value = 50;
-    lfo.type = 'sine'; lfo.frequency.value = 19;
-    lfoGain.gain.value = 0.4;
-    gain.gain.value = 0.0001;
-    lfo.connect(lfoGain); lfoGain.connect(gain.gain);
-    osc.connect(gain).connect(master);
-    osc.start(); lfo.start();
-    purrChain = { osc:osc, lfo:lfo, gain:gain };
-    return purrChain;
-  }
-
-  return {
-    setVolume: function(v){
-      volume = v / 100;
-      if(master) master.gain.setTargetAtTime(volume, getCtx().currentTime, 0.05);
-    },
-    hover: function(){
-      var now = performance.now();
-      if(now - lastHover < HOVER_COOLDOWN) return;
-      lastHover = now;
-      blip(1180 + Math.random() * 30, 0.08, 'sine', 0.014);
-    },
-    click: function(){
-      var now = performance.now();
-      if(now - lastClick < CLICK_COOLDOWN) return;
-      lastClick = now;
-      blip(680 + Math.random() * 20, 0.09, 'triangle', 0.03);
-    },
-    purr: function(strength){
-      var chain = ensurePurrChain();
-      var c = getCtx();
-      var peak = 0.15 * (strength || 1);
-      chain.gain.gain.cancelScheduledValues(c.currentTime);
-      chain.gain.gain.setValueAtTime(Math.max(chain.gain.gain.value, 0.0001), c.currentTime);
-      chain.gain.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0005), c.currentTime + 0.12);
-      chain.gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 1.6);
-    },
-    toggleAmbient: function(on){
-      var c = getCtx();
-      if(on && !ambientNodes){
-        var osc1 = c.createOscillator();
-        var osc2 = c.createOscillator();
-        var lfo = c.createOscillator();
-        var lfoGain = c.createGain();
-        var gain = c.createGain();
-        osc1.type = 'sine'; osc1.frequency.value = 58;
-        osc2.type = 'sine'; osc2.frequency.value = 87;
-        lfo.type = 'sine'; lfo.frequency.value = 0.12;
-        lfoGain.gain.value = 0.02;
-        gain.gain.value = 0.0001;
-        lfo.connect(lfoGain); lfoGain.connect(gain.gain);
-        osc1.connect(gain); osc2.connect(gain); gain.connect(master);
-        gain.gain.setTargetAtTime(0.035, c.currentTime, 1.4);
-        osc1.start(); osc2.start(); lfo.start();
-        ambientNodes = { osc1:osc1, osc2:osc2, lfo:lfo, gain:gain };
-      } else if(!on && ambientNodes){
-        ambientNodes.gain.gain.setTargetAtTime(0.0001, c.currentTime, 0.7);
-        var nodes = ambientNodes;
-        setTimeout(function(){
-          nodes.osc1.stop(); nodes.osc2.stop(); nodes.lfo.stop();
-        }, 1100);
-        ambientNodes = null;
-      }
-    }
-  };
-})();
-
-window.toggleAmbient = function(){
-  var btn = document.getElementById('ambient-btn');
-  var toggle = document.getElementById('ambient-toggle');
-  var isOn = toggle.classList.toggle('on');
-  btn.classList.toggle('active', isOn);
-  btn.innerHTML = isOn ? '🔊 Sound' : '🔈 Sound';
-  Sound.toggleAmbient(isOn);
-};
-
-/* ================= CAT MASCOT ================= */
-var Cat = (function(){
-  var canvas, cx, w, h;
-  var pointer = { x:0, y:0, active:false };
-  var petting = 0;       // 0..1 how squinted/happy the cat is
-  var hover = 0;         // 0..1 ear-twitch amount when mouse is near
-  var blink = 0;         // 0..1 current blink amount
-  var nextBlinkAt = 0;
-  var tailPhase = 0;
-  var hearts = [];
-  var sparkles = [];
-  var nextSparkleAt = 0;
-  var raf = null;
-
-  function draw(t){
-    cx.clearRect(0,0,w,h);
-    var cxp = w/2, cyp = h/2 - 6;
-
-    // soft glow behind the cat
-    var glow = cx.createRadialGradient(cxp, cyp+30, 10, cxp, cyp+30, 130);
-    glow.addColorStop(0, 'rgba(139,92,246,.16)');
-    glow.addColorStop(1, 'rgba(139,92,246,0)');
-    cx.fillStyle = glow;
-    cx.fillRect(0,0,w,h);
-
-    // tail (swishes gently, curls up faster when happy)
-    var tailSwing = Math.sin(tailPhase) * (10 + petting*10);
-    cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 10; cx.lineCap = 'round';
-    cx.beginPath();
-    cx.moveTo(cxp+62, cyp+70);
-    cx.quadraticCurveTo(cxp+100+tailSwing, cyp+50, cxp+92+tailSwing*1.4, cyp+4-petting*14);
-    cx.stroke();
-
-    // body
-    var bodyGrad = cx.createLinearGradient(cxp, cyp+30, cxp, cyp+110);
-    bodyGrad.addColorStop(0, '#211c3a'); bodyGrad.addColorStop(1, '#150f26');
-    cx.beginPath();
-    cx.ellipse(cxp, cyp+80, 54, 40, 0, 0, Math.PI*2);
-    cx.fillStyle = bodyGrad; cx.fill();
-    cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 2; cx.stroke();
-
-    // front paws
-    cx.fillStyle = '#211c3a'; cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 2;
-    [ -20, 20 ].forEach(function(ox){
-      cx.beginPath();
-      cx.ellipse(cxp+ox, cyp+112, 12, 9, 0, 0, Math.PI*2);
-      cx.fill(); cx.stroke();
-    });
-
-    // ears (twitch outward slightly on hover)
-    var earSpread = hover * 6;
-    cx.fillStyle = '#1b1730'; cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 2.2;
-    triangle(cxp-58-earSpread, cyp-40, cxp-84-earSpread, cyp-96, cxp-24, cyp-70);
-    triangle(cxp+58+earSpread, cyp-40, cxp+84+earSpread, cyp-96, cxp+24, cyp-70);
-    cx.fillStyle = 'rgba(244,114,182,.35)';
-    triangle(cxp-56-earSpread, cyp-46, cxp-72-earSpread, cyp-80, cxp-34, cyp-66);
-    triangle(cxp+56+earSpread, cyp-46, cxp+72+earSpread, cyp-80, cxp+34, cyp-66);
-
-    // head
-    var headGrad = cx.createRadialGradient(cxp-20, cyp-20, 10, cxp, cyp, 90);
-    headGrad.addColorStop(0, '#241f3d'); headGrad.addColorStop(1, '#150f26');
-    cx.beginPath();
-    cx.ellipse(cxp, cyp, 78, 62, 0, 0, Math.PI*2);
-    cx.fillStyle = headGrad; cx.fill();
-    cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 2.4; cx.stroke();
-
-    // collar + bell
-    cx.strokeStyle = '#f472b6'; cx.lineWidth = 5; cx.lineCap='round';
-    cx.beginPath();
-    cx.arc(cxp, cyp+50, 30, Math.PI*0.12, Math.PI*0.88);
-    cx.stroke();
-    cx.beginPath();
-    cx.arc(cxp, cyp+62, 5, 0, Math.PI*2);
-    cx.fillStyle = '#f0b232'; cx.fill();
-    cx.strokeStyle = '#8b5cf6'; cx.lineWidth = 1; cx.stroke();
-
-    // eyes (track pointer, close on blink or pet)
-    var maxOff = 8;
-    var dx = pointer.active ? Math.max(-1, Math.min(1, (pointer.x - cxp)/120)) * maxOff : 0;
-    var dy = pointer.active ? Math.max(-1, Math.min(1, (pointer.y - cyp)/120)) * maxOff : 0;
-    var squint = Math.max(petting, blink);
-    drawEye(cxp-28, cyp-6, dx, dy, squint);
-    drawEye(cxp+28, cyp-6, dx, dy, squint);
-
-    // nose
-    cx.fillStyle = '#f472b6';
-    triangle(cxp-6, cyp+16, cxp+6, cyp+16, cxp, cyp+22);
-
-    // mouth
-    cx.strokeStyle = '#f472b6'; cx.lineWidth = 2;
-    cx.beginPath();
-    cx.moveTo(cxp, cyp+22);
-    cx.quadraticCurveTo(cxp-10, cyp + (28 + petting*6), cxp-18, cyp+24);
-    cx.moveTo(cxp, cyp+22);
-    cx.quadraticCurveTo(cxp+10, cyp + (28 + petting*6), cxp+18, cyp+24);
-    cx.stroke();
-
-    // whiskers
-    cx.strokeStyle = 'rgba(196,181,253,.5)'; cx.lineWidth = 1.2;
-    [ -1, 1 ].forEach(function(side){
-      for(var i=0;i<3;i++){
-        cx.beginPath();
-        cx.moveTo(cxp + side*40, cyp + 6 + i*7);
-        cx.lineTo(cxp + side*80, cyp - 2 + i*9);
-        cx.stroke();
-      }
-    });
-
-    // ambient sparkles
-    sparkles.forEach(function(s){
-      cx.globalAlpha = s.alpha;
-      cx.font = s.size + 'px sans-serif';
-      cx.fillStyle = '#c4b5fd';
-      cx.fillText('✦', s.x, s.y);
-      cx.globalAlpha = 1;
-    });
-
-    // hearts
-    hearts.forEach(function(hpt){
-      cx.globalAlpha = hpt.alpha;
-      cx.font = '18px sans-serif';
-      cx.fillStyle = '#f472b6';
-      cx.fillText('❤', hpt.x, hpt.y);
-      cx.globalAlpha = 1;
-    });
-  }
-
-  function triangle(x1,y1,x2,y2,x3,y3){
-    cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.lineTo(x3,y3); cx.closePath();
-    cx.fill(); cx.stroke();
-  }
-
-  function drawEye(ex, ey, dx, dy, squint){
-    cx.strokeStyle = '#c4b5fd'; cx.lineWidth = 2;
-    if(squint > 0.15){
-      cx.beginPath();
-      cx.moveTo(ex-7, ey);
-      cx.quadraticCurveTo(ex, ey+6*squint, ex+7, ey);
-      cx.stroke();
-    } else {
-      cx.beginPath();
-      cx.ellipse(ex, ey, 7, 8, 0, 0, Math.PI*2);
-      cx.fillStyle = '#ece9f7'; cx.fill();
-      cx.beginPath();
-      cx.arc(ex+dx*0.6, ey+dy*0.6, 3.4, 0, Math.PI*2);
-      cx.fillStyle = '#0a0812'; cx.fill();
-    }
-  }
-
-  function loop(ts){
-    if(petting > 0) petting = Math.max(0, petting - 0.012);
-    hover += ((pointer.active ? 1 : 0) - hover) * 0.08;
-    tailPhase += 0.02 + petting*0.05;
-
-    // blinking, independent of petting
-    if(!nextBlinkAt) nextBlinkAt = ts + 3000;
-    if(ts > nextBlinkAt && petting < 0.1){
-      blink = 1; nextBlinkAt = ts + 2600 + Math.random()*3200;
-    }
-    if(blink > 0) blink = Math.max(0, blink - 0.15);
-
-    // occasional idle sparkle
-    if(!nextSparkleAt) nextSparkleAt = ts + 4000;
-    if(ts > nextSparkleAt){
-      sparkles.push({ x: w/2 + (Math.random()*100-50), y: h/2 - 60 - Math.random()*20, alpha:1, size: 10+Math.random()*8 });
-      nextSparkleAt = ts + 3500 + Math.random()*3500;
-    }
-    sparkles.forEach(function(s){ s.y -= 0.3; s.alpha -= 0.008; });
-    sparkles = sparkles.filter(function(s){ return s.alpha > 0; });
-
-    hearts.forEach(function(hp){ hp.y -= hp.vy; hp.alpha -= 0.012; });
-    hearts = hearts.filter(function(hp){ return hp.alpha > 0; });
-
-    updatePurrMeter();
-    draw(ts || 0);
-    raf = requestAnimationFrame(loop);
-  }
-
-  function updatePurrMeter(){
-    var meter = document.getElementById('purr-meter');
-    if(!meter) return;
-    if(meter.children.length === 0){
-      for(var i=0;i<12;i++){
-        var bar = document.createElement('div');
-        bar.className = 'purr-bar';
-        meter.appendChild(bar);
-      }
-    }
-    var bars = meter.children;
-    for(var j=0;j<bars.length;j++){
-      var base = petting > 0.05 ? (4 + Math.sin(Date.now()/90 + j) * 6 * petting + petting*8) : 4;
-      bars[j].style.height = Math.max(3, base) + 'px';
-      bars[j].style.opacity = petting > 0.05 ? 1 : .35;
-    }
-  }
-
-  function pet(){
-    petting = 1; blink = 0;
-    Sound.purr(1);
-    for(var i=0;i<6;i++){
-      hearts.push({
-        x: w/2 + (Math.random()*60-30),
-        y: h/2 - 20,
-        vy: 0.6 + Math.random()*0.6,
-        alpha: 1
-      });
-    }
-  }
-
-  return {
-    init: function(){
-      canvas = document.getElementById('cat-canvas');
-      if(!canvas) return;
-      cx = canvas.getContext('2d');
-      w = canvas.width; h = canvas.height;
-      canvas.addEventListener('mousemove', function(e){
-        var r = canvas.getBoundingClientRect();
-        pointer.x = (e.clientX - r.left) * (w / r.width);
-        pointer.y = (e.clientY - r.top) * (h / r.height);
-        pointer.active = true;
-      });
-      canvas.addEventListener('mouseleave', function(){ pointer.active = false; });
-      canvas.addEventListener('click', pet);
-      canvas.addEventListener('touchstart', function(e){ e.preventDefault(); pet(); }, { passive:false });
-      raf = requestAnimationFrame(loop);
-    },
-    petFromHero: function(){ Sound.purr(0.6); }
-  };
-})();
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
