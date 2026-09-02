@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mod log: Discord moderation portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0D1117;
+    --panel: #141A22;
+    --panel-2: #10151C;
+    --line: #262E38;
+    --text: #E7E9EC;
+    --muted: #8B95A1;
+    --amber: #F2A93B;
+    --teal: #4FC1B0;
+    --slate: #6B7480;
+    --max: 880px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0) 0 0/28px 28px,
+      var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  ::selection { background: var(--amber); color: #14100a; }
+
+  :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  .wrap{
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  h1, h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---------- header / hero ---------- */
+
+  .hero{
+    padding: 88px 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-grid{
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items: end;
+  }
+
+  .tag{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+  }
+
+  .tag .dot{
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 3px rgba(242,169,59,0.15);
+  }
+
+  .avatar{
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    margin-bottom: 18px;
+  }
+
+  .hero h1{
+    font-size: clamp(2.1rem, 4.4vw, 3rem);
+    line-height: 1.1;
+  }
+
+  .hero p.lede{
+    margin-top: 16px;
+    max-width: 46ch;
+    color: var(--muted);
+    font-size: 1.05rem;
+  }
+
+  .readout{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .readout-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .live{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .live-dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background: var(--teal);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse{
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .stat-row{
+    display:flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .stat .num{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 600;
+    display:block;
+  }
+
+  .stat .label{
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* ---------- roster ---------- */
+
+  .roster{
+    padding: 64px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .roster h2{
+    font-size: 1.6rem;
+  }
+
+  .roster .section-note{
+    color: var(--muted);
+    max-width: 52ch;
+    margin: 10px 0 36px;
+  }
+
+  .rows{
+    border-top: 1px solid var(--line);
+  }
+
+  .row{
+    display: grid;
+    grid-template-columns: 56px 1.4fr 1.6fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .rank{
+    display:flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .rank span{
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 6px solid currentColor;
+  }
+
+  .rank.tier-3 { color: var(--amber); }
+  .rank.tier-2 { color: var(--teal); }
+  .rank.tier-1 { color: var(--slate); }
+
+  .who .role{
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .who .server{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+
+  .role.tier-3 { color: var(--amber); }
+  .role.tier-2 { color: var(--teal); }
+  .role.tier-1 { color: var(--slate); }
+
+  .blurb{
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 42ch;
+  }
+
+  .count{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.15rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .count small{
+    display:block;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  /* ---------- about ---------- */
+
+  .about{
+    padding: 64px 0;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 40px;
+  }
+
+  .about h2{ font-size: 1.6rem; }
+
+  .about .body{
+    color: var(--muted);
+  }
+
+  .about .body p{ margin: 0 0 14px; }
+
+  .edit-note{
+    display:inline-block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--slate);
+    border: 1px dashed var(--line);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  /* ---------- contact / footer ---------- */
+
+  .contact{
+    padding: 56px 0 40px;
+    display:flex;
+    align-items:baseline;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .contact h2{ font-size: 1.4rem; }
+
+  .contact-links{
+    display:flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  .contact-links span{
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+    color: var(--text);
+    font-size: 0.95rem;
+    cursor: default;
+  }
+
+  .contact-links span:hover{ border-color: var(--amber); }
+
+  footer{
+    padding: 24px 0 60px;
+    color: var(--slate);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 720px){
+    .hero-grid{ grid-template-columns: 1fr; }
+    .about{ grid-template-columns: 1fr; }
+    .row{
+      grid-template-columns: 32px 1fr;
+      grid-template-areas:
+        "rank who"
+        ".    blurb"
+        ".    count";
+      row-gap: 8px;
+    }
+    .rank{ grid-area: rank; flex-direction: row; }
+    .who{ grid-area: who; }
+    .blurb{ grid-area: blurb; max-width: none; }
+    .count{ grid-area: count; text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    .live-dot{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <img class="avatar" src="https://media1.tenor.com/m/JgJZxkQ7NDoAAAAd/jinx-cat.gif" alt="Jinx's profile picture, a cat gif">
+        <div class="tag"><span class="dot" aria-hidden="true"></span>Discord moderator &amp; community staff</div>
+        <h1>Jinx</h1>
+        <p class="lede">
+          I help run and moderate four Discord communities, from small dev servers
+          to one with over 220,000 members. Below is where, and what I do there.
+        </p>
+      </div>
+
+      <div class="readout">
+        <div class="readout-head">
+          <span>Reach, right now</span>
+          <span class="live"><span class="live-dot" aria-hidden="true"></span>current</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat">
+            <span class="num" data-target="233389">0</span>
+            <span class="label">members across every server</span>
+          </div>
+          <div class="stat">
+            <span class="num" data-target="4">0</span>
+            <span class="label">communities staffed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="roster">
+    <h2>Servers I keep in order</h2>
+    <p class="section-note">
+      Ranked staff first, testers after. This is the actual reporting order I work within on each server.
+    </p>
+
+    <div class="rows">
+
+      <div class="row">
+        <div class="rank tier-3" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="who">
+          <div class="role tier-3">Manager</div>
+          <div class="server">code11's community</div>
+        </div>
+        <div class="blurb">Sets structure for the server: organizing channels, staff, and how moderation decisions get made.</div>
+        <div class="count">1,613<small>members</small></div>
+      </div>
+
+      <div class="row">
+        <div class="rank tier-2" aria-hidden="true"><span></span><span></span></div>
+        <div class="who">
+          <div class="role tier-2">Moderator</div>
+          <div class="server">Project Uncopylocked Production</div>
+        </div>
+        <div class="blurb">Enforces the rules day to day: reviewing reports, handling disputes, and removing content that breaks guidelines.</div>
+        <div class="count">4,967<small>members</small></div>
+      </div>
+
+      <div class="row">
+        <div class="rank tier-1" aria-hidden="true"><span></span></div>
+        <div class="who">
+          <div class="role tier-1">Tester</div>
+          <div class="server">Fix it Up</div>
+        </div>
+        <div class="blurb">Tries new builds and updates before release, then reports back bugs and edge cases the team should know about.</div>
+        <div class="count">223,639<small>members</small></div>
+      </div>
+
+      <div class="row">
+        <div class="rank tier-1" aria-hidden="true"><span></span></div>
+        <div class="who">
+          <div class="role tier-1">Tester</div>
+          <div class="server">The slop company</div>
+        </div>
+        <div class="blurb">Runs through changes ahead of release, hunting for bugs and rough edges before the wider community sees them.</div>
+        <div class="count">3,170<small>members</small></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="about">
+    <h2>About</h2>
+    <div class="body">
+      <p>
+        I like keeping communities running smoothly: clear rules, fast reports,
+        and staff who actually talk to each other. Outside of that I'm mostly here
+        for silly cats, so it tracks that half my job is watching chat like one.
+      </p>
+    </div>
+  </section>
+
+  <div class="contact">
+    <h2>Get in touch</h2>
+    <div class="contact-links">
+      <span>Discord: Jinx (790275674785972245)</span>
+      <span>jinxworkpotfoilo@gmail.com</span>
+    </div>
+  </div>
+
+  <footer>
+    Mod log: built to keep track of the communities I help run.
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var nums = document.querySelectorAll('.num');
+
+    nums.forEach(function(el){
+      var target = parseInt(el.getAttribute('data-target'), 10);
+      if (reduce) {
+        el.textContent = target.toLocaleString('en-US');
+        return;
+      }
+      var start = null;
+      var duration = 900;
+      function step(ts){
+        if (!start) start = ts;
+        var progress = Math.min((ts - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var value = Math.round(eased * target);
+        el.textContent = value.toLocaleString('en-US');
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  })();
+</script>
+
+</body>
+</html>
